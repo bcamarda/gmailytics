@@ -12,6 +12,7 @@ gem 'rails', '3.2.7'
     gem 'webrat'
     gem 'rspec-rails'
     gem 'capybara'
+    gem 'launchy'
  end
 
 # Gems used only for assets and not required

@@ -59,6 +59,8 @@ GEM
       railties (>= 3.2.0, < 5.0)
       thor (~> 0.14)
     json (1.7.4)
+    launchy (2.1.2)
+      addressable (~> 2.3)
     libwebsocket (0.1.5)
       addressable
     mail (2.4.4)
@@ -146,6 +148,7 @@ DEPENDENCIES
   capybara
   coffee-rails (~> 3.2.1)
   jquery-rails
+  launchy
   pg
   rails (= 3.2.7)
   rspec

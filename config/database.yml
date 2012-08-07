@@ -15,7 +15,7 @@
 development:
   adapter: postgresql
   encoding: unicode
-  database: 
+  database: email_profiler
   pool: 5
   username: 
   password:
@@ -42,7 +42,7 @@ development:
 test:
   adapter: postgresql
   encoding: unicode
-  database: 
+  database: email_profiler_test
   pool: 5
   username: 
   password:
