@@ -150,6 +150,8 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   jquery-rails
   launchy
+  mail
+  oauth
   pg
   rails (= 3.2.7)
   rspec
