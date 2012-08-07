@@ -15,7 +15,11 @@
 development:
   adapter: postgresql
   encoding: unicode
-  database: email_profiler_development
+  database: email_profiler
+  pool: 5
+  username: 
+  password:
+
   host: localhost
 
 # Warning: The database defined as "test" will be erased and
@@ -25,6 +29,9 @@ test:
   adapter: postgresql
   encoding: unicode
   database: email_profiler_test
+  pool: 5
+  username: 
+  password:
   host: localhost
 
 production:
