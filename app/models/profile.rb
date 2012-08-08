@@ -1,6 +1,7 @@
 class Profile < ActiveRecord::Base
   require 'net/imap'
   require 'mail'
+
   attr_accessible :email, :password
 
   def params_to
@@ -12,7 +13,7 @@ class Profile < ActiveRecord::Base
     imap.login(email, password)
     imap.select('INBOX')
     email_ids = imap.search(['ALL'])
-    emails = email_ids.map { |id| Mail.new(imap.fetch(id,'RFC822')[0].attr['RFC822']) }
+    emails = email_ids.map { |id| Mail.new(imap.fetch(id,'BODY.PEEK[]')[0].attr['BODY[]']) }
     emails
   end
 
