@@ -16,7 +16,7 @@ class ProfilesController < ApplicationController
 
   def show
     @profile = Profile.find_by_id(params[:id])
-    @emails = @profile.fetch_emails
+
   end
 
 end
