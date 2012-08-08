@@ -4,6 +4,7 @@ EmailProfiler::Application.routes.draw do
 root :to => 'profiles#new'
 
 resources :profiles
+match "/oauth/authenticate" => "oauth#create"
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'

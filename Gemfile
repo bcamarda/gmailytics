@@ -7,6 +7,9 @@ gem 'rails', '3.2.7'
 gem 'pg'
 gem 'mail'
 gem 'oauth'
+gem 'gmail_xoauth'
+
+gem 'ruby-hmac'
 
  group :development, :test do
 

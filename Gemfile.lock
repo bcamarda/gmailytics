@@ -52,6 +52,8 @@ GEM
     execjs (1.4.0)
       multi_json (~> 1.0)
     ffi (1.1.4)
+    gmail_xoauth (0.3.2)
+      oauth (>= 0.3.6)
     hike (1.2.1)
     i18n (0.6.0)
     journey (1.0.4)
@@ -111,6 +113,7 @@ GEM
       activesupport (>= 3.0)
       railties (>= 3.0)
       rspec (~> 2.11.0)
+    ruby-hmac (0.4.0)
     rubyzip (0.9.9)
     sass (3.1.20)
     sass-rails (3.2.5)
@@ -148,6 +151,7 @@ PLATFORMS
 DEPENDENCIES
   capybara
   coffee-rails (~> 3.2.1)
+  gmail_xoauth
   jquery-rails
   launchy
   mail
@@ -156,6 +160,7 @@ DEPENDENCIES
   rails (= 3.2.7)
   rspec
   rspec-rails
+  ruby-hmac
   sass-rails (~> 3.2.3)
   uglifier (>= 1.0.3)
   webrat

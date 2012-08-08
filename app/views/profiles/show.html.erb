@@ -1,3 +1,10 @@
 <%= @profile.email %>
 <%= @profile.password %><br />
-<%= @emails.first.from %>
+<ul>
+<% @emails.each do |email| %>
+	<li><%= email.inspect %></li>
+<% end %>
+</ul>
+<script>
+
+</script>

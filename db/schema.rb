@@ -16,8 +16,10 @@ ActiveRecord::Schema.define(:version => 20120807220653) do
   create_table "profiles", :force => true do |t|
     t.string   "email"
     t.string   "password"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.string   "oauth_token"
+    t.string   "oauth_token_secret"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
   end
 
 end
