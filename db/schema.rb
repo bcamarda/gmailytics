@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120809032101) do
+ActiveRecord::Schema.define(:version => 20120809033828) do
 
   create_table "emails", :force => true do |t|
     t.integer  "profile_id"
@@ -21,9 +21,18 @@ ActiveRecord::Schema.define(:version => 20120809032101) do
     t.datetime "updated_at",   :null => false
     t.string   "sentreceived"
     t.string   "seenunseen"
+    t.string   "from"
   end
 
   add_index "emails", ["date"], :name => "index_emails_on_date"
+
+  create_table "emails_tos", :force => true do |t|
+    t.integer  "email_id"
+    t.string   "recipient_type"
+    t.string   "address"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+  end
 
   create_table "profiles", :force => true do |t|
     t.string   "email"
