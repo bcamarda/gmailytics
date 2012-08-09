@@ -57,13 +57,6 @@ class Profile < ActiveRecord::Base
 
   private
 
-  def get24hourgraph
-    graph = Hash.new(0)
-    self.emails.each do |email|
-      graph[email.date.hour] += 1
-    end
-  end
-
   def monkeypatch_imap
     # stolen (borrowed) from https://gist.github.com/2712611
     class << @imap.instance_variable_get("@parser")
