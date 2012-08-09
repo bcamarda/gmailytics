@@ -27,10 +27,30 @@ class Profile < ActiveRecord::Base
       email_params = {}
       header['X-GM-LABELS'].include?(:Sent) ? email_params[:sentreceived] = :sent  : email_params[:sentreceived] = :received
       header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
-      email_params[:subject]  = header['ENVELOPE'].subject
-      email_params[:date]     = header['ENVELOPE'].date
 
-      self.emails.create(email_params)
+      envelope = header['ENVELOPE']
+      email_params[:subject]  = envelope.subject
+      email_params[:date]     = envelope.date
+      email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host'] 
+
+      email = self.emails.create(email_params)
+
+      envelope.to.each do |address|  
+        email.emails_tos.create(:recipient_type => 'to', :address => (address['mailbox'] + '@' + address['host']))
+      end
+
+      unless envelope.cc.nil?
+        envelope.cc.each do |address|  
+          email.emails_tos.create(:recipient_type => 'cc', :address => (address['mailbox'] + '@' + address['host']))
+        end
+      end
+
+      unless envelope.bcc.nil?
+        envelope.bcc.each do |address|  
+          email.emails_tos.create(:recipient_type => 'bcc', :address => (address['mailbox'] + '@' + address['host']))
+        end
+      end
+
     end
       
   end
