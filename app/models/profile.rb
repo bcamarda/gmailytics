@@ -44,6 +44,15 @@ class Profile < ActiveRecord::Base
       
   end
 
+  def get24hourgraph
+    graph = Hash.new(0)
+    self.emails.each do |email|
+      graph[email.date.hour] += 1
+    end
+    json_data = []
+    (0..23).map { |i| json_data[i] = graph[i] }
+  end
+
   private
 
   def fetch_and_save_emails_helper(uid_ar, email_params)
@@ -58,13 +67,6 @@ class Profile < ActiveRecord::Base
 
         self.emails.create(email_params)
       end
-  end
-
-  def get24hourgraph
-    graph = Hash.new(0)
-    self.emails.each do |email|
-      graph[email.date.hour] += 1
-    end
   end
 
 end
