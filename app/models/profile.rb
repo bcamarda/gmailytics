@@ -7,10 +7,6 @@ class Profile < ActiveRecord::Base
 
   has_many :emails
 
-  def params_to
-    :email
-  end
-
   def fetch_and_save_emails
     @imap = Net::IMAP.new('imap.gmail.com', 993, true)
 
@@ -54,7 +50,6 @@ class Profile < ActiveRecord::Base
 
         email_params[:subject]  = header.subject
         email_params[:date]     = header.date
-        email_params[:uid]      = id
 
         self.emails.create(email_params)
       end

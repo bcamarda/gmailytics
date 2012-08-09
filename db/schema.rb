@@ -11,18 +11,19 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120808220231) do
+ActiveRecord::Schema.define(:version => 20120809025622) do
 
   create_table "emails", :force => true do |t|
     t.integer  "profile_id"
-    t.integer  "uid"
     t.string   "subject"
     t.datetime "date"
-    t.string   "sentreceived"
-    t.string   "seenunseen"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.string   "sentreceived", :default => "received"
+    t.string   "seenunseen",   :default => "unseen"
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
   end
+
+  add_index "emails", ["date"], :name => "index_emails_on_date"
 
   create_table "profiles", :force => true do |t|
     t.string   "email"
