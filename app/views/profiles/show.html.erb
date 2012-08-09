@@ -1,5 +1,22 @@
 <%= @profile.email %>
 
+<style type="text/css" media="all">
+  body {
+    background-color: purple;
+  }
+
+  .axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+  }
+</style>
+
 <script src="http://d3js.org/d3.v2.js"></script>
 <script>
   var data = []
@@ -9,6 +26,7 @@
 
   getData();
 
+  /***** SVG setup ******/
   var width = 400,
   height = 400,
   padding = 20,
@@ -18,14 +36,42 @@
   .attr("width", width)
   .attr("height", height);
 
+  /****** Axes/Scales *******/
   xScale = d3.scale.linear()
   .domain([0, data.length - 1])
   .range([0, width - padding * 2]);
 
-  yScale = d3.scale.linear()
-  .domain([0, 100])
-  .range([0, height - padding * 2]);
+  var xAxis = d3.svg.axis()
+  .scale(xScale)
+  .orient("bottom")
+  .ticks(24);
 
+  svg.append("g")
+  .attr("class", "axis")
+  .attr("transform", "translate(5, 0)")
+  .call(xAxis);
+
+  var drawYScale = function() {
+    yScaleMax = d3.max(data, function(d) {
+      return d.sent + d.received;
+    });
+
+    yScale = d3.scale.linear()
+    .domain([0, yScaleMax])
+    .range([0, height - padding * 2]);
+  };
+
+  drawYScale();
+
+  var yAxis = d3.svg.axis()
+  .scale(yScale)
+  .orient("left");
+
+  svg.append("g")
+  .attr("class", "axis")
+  .call(yAxis);
+
+  /******* Data viz *******/
   svg.selectAll("rect")
   .data(data)
   .enter()
@@ -38,7 +84,7 @@
   .duration(2000)
   .attr("y", function(d) { return height - yScale(d.sent); }) 
   .attr("height", function(d) { return yScale(d.sent); } )
-  .attr("fill", "goldenrod")
+  .attr("fill", "goldenrod");
 
   function redraw() {
     svg.selectAll("rect")
@@ -70,12 +116,13 @@
     .transition()
     .duration(2000)
     .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
-    .attr("height", function(d) { return yScale(d.received); } )
+    .attr("height", function(d) { return yScale(d.received); } );
   }
 
   setInterval(function() {
     data = [];
     getData();
+    drawYScale();
     redraw();
     redraw2();
   }, 2000);
