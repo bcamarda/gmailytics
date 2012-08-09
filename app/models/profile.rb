@@ -56,16 +56,18 @@ class Profile < ActiveRecord::Base
   end
 
   def get24hourgraph
-    graph = Hash.new(0)
+    hourly_array = (0..23).map { {"sent" => 0, "received" => 0 } }
     self.emails.each do |email|
-      graph[email.date.hour] += 1
+      if email[:sentreceived] == "sent"
+        hourly_array[email.date.hour]["sent"] += 1
+      else
+        hourly_array[email.date.hour]["received"] += 1
+      end
     end
-    json_data = []
-    (0..23).map { |i| json_data[i] = graph[i] }
+    hourly_array
   end
 
   private
-
   def fetch_and_save_emails_helper(uid_ar, email_params)
       @imap.select('[Gmail]/All Mail')
 
