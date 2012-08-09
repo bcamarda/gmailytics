@@ -22,16 +22,18 @@ class Profile < ActiveRecord::Base
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
     @imap.search(['ALL']).each do |id|
-      header = @imap.fetch(id,['ENVELOPE','FLAGS','X-GM-LABELS'])[0].attr
+      header = @imap.fetch(id,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])[0].attr
 
       email_params = {}
       header['X-GM-LABELS'].include?(:Sent) ? email_params[:sentreceived] = :sent  : email_params[:sentreceived] = :received
       header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+      email_params[:uid]      = header['X-GM-MSGID']
 
       envelope = header['ENVELOPE']
       email_params[:subject]  = envelope.subject
       email_params[:date]     = envelope.date
-      email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host'] 
+      email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
+      
 
       email = self.emails.create(email_params)
 
@@ -106,6 +108,7 @@ class Profile < ActiveRecord::Base
         return attr
       end
     end
+
   end
 
 end

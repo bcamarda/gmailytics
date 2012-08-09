@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120809033828) do
+ActiveRecord::Schema.define(:version => 20120809043641) do
 
   create_table "emails", :force => true do |t|
     t.integer  "profile_id"
@@ -22,9 +22,11 @@ ActiveRecord::Schema.define(:version => 20120809033828) do
     t.string   "sentreceived"
     t.string   "seenunseen"
     t.string   "from"
+    t.string   "uid"
   end
 
   add_index "emails", ["date"], :name => "index_emails_on_date"
+  add_index "emails", ["uid"], :name => "index_emails_on_uid"
 
   create_table "emails_tos", :force => true do |t|
     t.integer  "email_id"
