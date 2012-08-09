@@ -18,47 +18,80 @@ class Profile < ActiveRecord::Base
     )
 
     @imap.select('[Gmail]/All Mail')
+ 
+    monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    all_email_ids = @imap.search(['ALL'])
-    unseen_email_ids = @imap.search(['UNSEEN'])
+    @imap.search(['ALL']).each do |id|
+      header = @imap.fetch(id,['ENVELOPE','FLAGS','X-GM-LABELS'])[0].attr
 
-    @imap.select('[Gmail]/Sent Mail')
+      email_params = {}
+      header['X-GM-LABELS'].include?(:Sent) ? email_params[:sentreceived] = :sent  : email_params[:sentreceived] = :received
+      header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+      email_params[:subject]  = header['ENVELOPE'].subject
+      email_params[:date]     = header['ENVELOPE'].date
 
-    sent_email_ids = @imap.search(['ALL'])
-    seen_received_email_ids = all_email_ids - sent_email_ids - unseen_email_ids
-
-    puts "unseen email: #{unseen_email_ids}"
-    puts "seen received email: #{seen_received_email_ids}"
-    puts "sent email: #{sent_email_ids}"
-
-    fetch_and_save_emails_helper(  seen_received_email_ids,  {:sentreceived => 'received',  :seenunseen => 'seen'})
-    fetch_and_save_emails_helper(  unseen_email_ids,         {:sentreceived => 'received',  :seenunseen => 'unseen'})
-    fetch_and_save_emails_helper(  sent_email_ids,           {:sentreceived => 'sent',      :seenunseen => 'seen'})
-
-    # If we ever want to grab the full contents of the email, including attachments and body =>
-    # emails = email_ids.map { |id| Mail.new(imap.fetch(id,'BODY.PEEK[]')[0].attr['BODY[]']) }
+      self.emails.create(email_params)
+    end
       
   end
 
   private
 
-  def fetch_and_save_emails_helper(uid_ar, email_params)
-      @imap.select('[Gmail]/All Mail')
-
-      uid_ar.each do |id|
-        header = @imap.fetch(id,'ENVELOPE')[0].attr['ENVELOPE']
-
-        email_params[:subject]  = header.subject
-        email_params[:date]     = header.date
-
-        self.emails.create(email_params)
-      end
-  end
-
   def get24hourgraph
     graph = Hash.new(0)
     self.emails.each do |email|
       graph[email.date.hour] += 1
+    end
+  end
+
+  def monkeypatch_imap
+    # stolen (borrowed) from https://gist.github.com/2712611
+    class << @imap.instance_variable_get("@parser")
+
+      # copied from the stdlib net/smtp.rb
+      def msg_att
+        match(T_LPAR)
+        attr = {}
+        while true
+          token = lookahead
+          case token.symbol
+          when T_RPAR
+            shift_token
+            break
+          when T_SPACE
+            shift_token
+            token = lookahead
+          end
+          case token.value
+          when /\A(?:ENVELOPE)\z/ni
+            name, val = envelope_data
+          when /\A(?:FLAGS)\z/ni
+            name, val = flags_data
+          when /\A(?:INTERNALDATE)\z/ni
+            name, val = internaldate_data
+          when /\A(?:RFC822(?:\.HEADER|\.TEXT)?)\z/ni
+            name, val = rfc822_text
+          when /\A(?:RFC822\.SIZE)\z/ni
+            name, val = rfc822_size
+          when /\A(?:BODY(?:STRUCTURE)?)\z/ni
+            name, val = body_data
+          when /\A(?:UID)\z/ni
+            name, val = uid_data
+
+          # adding in Gmail extended attributes
+          when /\A(?:X-GM-LABELS)\z/ni
+            name, val = flags_data
+          when /\A(?:X-GM-MSGID)\z/ni
+            name, vale = uid_data
+          when /\A(?:X-GM-THRID)\z/ni
+            name, val = uid_data
+          else
+            parse_error("unknown attribute `%s'", token.value)
+          end
+          attr[name] = val
+        end
+        return attr
+      end
     end
   end
 
