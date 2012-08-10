@@ -17,6 +17,10 @@ class ProfilesController < ApplicationController
   def show
     @profile = Profile.find_by_id(params[:id])
 
+    respond_to do |format|
+      format.json { render :json => @profile.get24hourgraph }
+      format.html
+    end
   end
 
 end
