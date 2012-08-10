@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.7'
+gem 'pry-rails'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'group :test, :development, :production do
@@ -10,6 +11,7 @@ gem 'oauth'
 gem 'gmail_xoauth'
 
 gem 'ruby-hmac'
+gem 'delayed_job_active_record'
 
  group :development, :test do
 

@@ -69,7 +69,32 @@ class Profile < ActiveRecord::Base
       
   end
 
+  def get24hourgraph
+    hourly_array = (0..23).map { {"sent" => 0, "received" => 0 } }
+    self.emails.each do |email|
+      if email[:sentreceived] == "sent"
+        hourly_array[email.date.hour]["sent"] += 1
+      else
+        hourly_array[email.date.hour]["received"] += 1
+      end
+    end
+    hourly_array
+  end
+
   private
+  def fetch_and_save_emails_helper(uid_ar, email_params)
+      @imap.select('[Gmail]/All Mail')
+
+      uid_ar.each do |id|
+        header = @imap.fetch(id,'ENVELOPE')[0].attr['ENVELOPE']
+
+        email_params[:subject]  = header.subject
+        email_params[:date]     = header.date
+        email_params[:uid]      = id
+
+        self.emails.create(email_params)
+      end
+  end
 
   def monkeypatch_imap
     # stolen (borrowed) from https://gist.github.com/2712611
@@ -144,5 +169,4 @@ class Profile < ActiveRecord::Base
   def bad_email?(header)
     header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil?
   end
-
 end
