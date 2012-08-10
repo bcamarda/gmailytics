@@ -21,14 +21,17 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    batched_email_ids = batch_array(@imap.search(['ALL']), 1000)
+    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 1000)
 
     
 
     batched_email_ids.each do |batch|
       batched_emails = @imap.fetch(batch,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])
 
+      puts batch.inspect
+      
       batched_emails.each_with_index do |email,index|
+        puts index
         header = email.attr
 
         unless bad_email?(header)
@@ -38,7 +41,7 @@ class Profile < ActiveRecord::Base
           email_params[:uid]      = header['X-GM-MSGID']
 
           envelope = header['ENVELOPE']
-          email_params[:subject]  = envelope.subject
+          email_params[:subject]  = envelope.subject[0..254]
           email_params[:date]     = envelope.date
           email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
           
@@ -66,7 +69,32 @@ class Profile < ActiveRecord::Base
       
   end
 
+  def get24hourgraph
+    hourly_array = (0..23).map { {"sent" => 0, "received" => 0 } }
+    self.emails.each do |email|
+      if email[:sentreceived] == "sent"
+        hourly_array[email.date.hour]["sent"] += 1
+      else
+        hourly_array[email.date.hour]["received"] += 1
+      end
+    end
+    hourly_array
+  end
+
   private
+  def fetch_and_save_emails_helper(uid_ar, email_params)
+      @imap.select('[Gmail]/All Mail')
+
+      uid_ar.each do |id|
+        header = @imap.fetch(id,'ENVELOPE')[0].attr['ENVELOPE']
+
+        email_params[:subject]  = header.subject
+        email_params[:date]     = header.date
+        email_params[:uid]      = id
+
+        self.emails.create(email_params)
+      end
+  end
 
   def monkeypatch_imap
     # stolen (borrowed) from https://gist.github.com/2712611
@@ -141,5 +169,4 @@ class Profile < ActiveRecord::Base
   def bad_email?(header)
     header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil?
   end
-
 end
