@@ -83,6 +83,8 @@ GEM
       slop (~> 3.3.1)
     pry-rails (0.2.0)
       pry
+    quiet_assets (1.0.1)
+      railties (~> 3.1)
     rack (1.4.1)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -166,7 +168,11 @@ DEPENDENCIES
   mail
   oauth
   pg
+<<<<<<< HEAD
   pry-rails
+=======
+  quiet_assets
+>>>>>>> master
   rails (= 3.2.7)
   rspec
   rspec-rails

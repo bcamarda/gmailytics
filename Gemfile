@@ -19,6 +19,7 @@ gem 'ruby-hmac'
     gem 'rspec-rails'
     gem 'capybara'
     gem 'launchy'
+    gem 'quiet_assets'
  end
 
 # Gems used only for assets and not required

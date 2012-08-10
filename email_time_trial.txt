@@ -1,0 +1,90 @@
+bcamarda@gmail.com - 52,929 emails
+8/9/2012 5:23PM
+
+Trial with validations and 100 batch size
+
+Minute 1:
+1.9.3p194 :002 > Email.all.count
+  Email Load (54.2ms)  SELECT "emails".* FROM "emails" 
+ => 2944 
+
+
+Minute 2:
+1.9.3p194 :003 > Email.all.count
+  Email Load (30.9ms)  SELECT "emails".* FROM "emails" 
+ => 3771
+
+Minute 3:  
+1.9.3p194 :004 > Email.all.count
+  Email Load (61.2ms)  SELECT "emails".* FROM "emails" 
+ => 4779
+
+
+Minute 4:  
+1.9.3p194 :005 > Email.all.count
+  Email Load (49.3ms)  SELECT "emails".* FROM "emails" 
+ => 5910
+
+
+Minute 5:  
+1.9.3p194 :006 > Email.all.count
+  Email Load (54.5ms)  SELECT "emails".* FROM "emails" 
+ => 6409
+
+
+Minute 6:  
+1.9.3p194 :007 > Email.all.count
+  Email Load (52.8ms)  SELECT "emails".* FROM "emails" 
+ => 7115
+
+
+Minute 7:  
+1.9.3p194 :008 > Email.all.count
+  Email Load (64.3ms)  SELECT "emails".* FROM "emails" 
+ => 8466
+
+
+Minute 8:  
+1.9.3p194 :009 > Email.all.count
+  Email Load (101.8ms)  SELECT "emails".* FROM "emails" 
+ => 9362
+
+
+Minute 9:  
+1.9.3p194 :010 > Email.all.count
+  Email Load (173.3ms)  SELECT "emails".* FROM "emails" 
+  EXPLAIN (87.2ms)  EXPLAIN SELECT "emails".* FROM "emails" 
+EXPLAIN for: SELECT "emails".* FROM "emails" 
+                         QUERY PLAN
+-------------------------------------------------------------
+ Seq Scan on emails  (cost=0.00..291.41 rows=9841 width=120)
+(1 row)
+
+ => 9814
+
+
+Minute 10:  
+1.9.3p194 :011 > Email.all.count
+  Email Load (86.4ms)  SELECT "emails".* FROM "emails" 
+  EXPLAIN (0.4ms)  EXPLAIN SELECT "emails".* FROM "emails" 
+EXPLAIN for: SELECT "emails".* FROM "emails" 
+                          QUERY PLAN
+--------------------------------------------------------------
+ Seq Scan on emails  (cost=0.00..314.92 rows=10592 width=122)
+(1 row)
+
+ => 10604
+
+
+Minute 11:  
+1.9.3p194 :012 > Email.all.count
+  Email Load (113.0ms)  SELECT "emails".* FROM "emails" 
+  EXPLAIN (0.4ms)  EXPLAIN SELECT "emails".* FROM "emails" 
+EXPLAIN for: SELECT "emails".* FROM "emails" 
+                          QUERY PLAN
+--------------------------------------------------------------
+ Seq Scan on emails  (cost=0.00..331.49 rows=11149 width=122)
+(1 row)
+
+ => 11156 
+1.9.3p194 :013 > 

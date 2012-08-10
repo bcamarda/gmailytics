@@ -21,36 +21,50 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    @imap.search(['ALL']).each do |id|
-      header = @imap.fetch(id,['ENVELOPE','FLAGS','X-GM-LABELS'])[0].attr
+    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 1000)
 
-      email_params = {}
-      header['X-GM-LABELS'].include?(:Sent) ? email_params[:sentreceived] = :sent  : email_params[:sentreceived] = :received
-      header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+    
 
-      envelope = header['ENVELOPE']
-      email_params[:subject]  = envelope.subject
-      email_params[:date]     = envelope.date
-      email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host'] 
+    batched_email_ids.each do |batch|
+      batched_emails = @imap.fetch(batch,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])
 
-      email = self.emails.create(email_params)
+      puts batch.inspect
+      
+      batched_emails.each_with_index do |email,index|
+        puts index
+        header = email.attr
 
-      envelope.to.each do |address|  
-        email.emails_tos.create(:recipient_type => 'to', :address => (address['mailbox'] + '@' + address['host']))
-      end
+        unless bad_email?(header)
+          email_params = {}
+          header['X-GM-LABELS'].include?(:Sent) ? email_params[:sentreceived] = :sent  : email_params[:sentreceived] = :received
+          header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+          email_params[:uid]      = header['X-GM-MSGID']
 
-      unless envelope.cc.nil?
-        envelope.cc.each do |address|  
-          email.emails_tos.create(:recipient_type => 'cc', :address => (address['mailbox'] + '@' + address['host']))
+          envelope = header['ENVELOPE']
+          email_params[:subject]  = envelope.subject[0..254]
+          email_params[:date]     = envelope.date
+          email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
+          
+
+          email = self.emails.create(email_params)
+
+          envelope.to.each do |address|  
+            email.emails_tos.create(:recipient_type => 'to', :address => (address['mailbox'] + '@' + address['host']))
+          end
+
+          unless envelope.cc.nil? || envelope.cc[0]['mailbox'].nil?
+            envelope.cc.each do |address|  
+              email.emails_tos.create(:recipient_type => 'cc', :address => (address['mailbox'] + '@' + address['host']))
+            end
+          end
+
+          unless envelope.bcc.nil? || envelope.bcc[0]['mailbox'].nil?
+            envelope.bcc.each do |address|  
+              email.emails_tos.create(:recipient_type => 'bcc', :address => (address['mailbox'] + '@' + address['host']))
+            end
+          end
         end
       end
-
-      unless envelope.bcc.nil?
-        envelope.bcc.each do |address|  
-          email.emails_tos.create(:recipient_type => 'bcc', :address => (address['mailbox'] + '@' + address['host']))
-        end
-      end
-
     end
       
   end
@@ -131,5 +145,28 @@ class Profile < ActiveRecord::Base
         return attr
       end
     end
+
+  end
+
+  def batch_array(ar, batch_size)
+    #batch_array([1,2,3,4,5,6,7], 3) => [[1,2,3],[4,5,6],[7]]
+    ar2 = []
+    memo = []
+    ar.each_with_index do |el,index|
+      if index % batch_size == 0
+        memo = [ el ]
+      else
+        memo << el
+      end
+
+      if ((index % batch_size) == (batch_size - 1)) || index == ar.count - 1
+        ar2 << memo
+      end
+    end
+    ar2
+  end
+
+  def bad_email?(header)
+    header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil?
   end
 end

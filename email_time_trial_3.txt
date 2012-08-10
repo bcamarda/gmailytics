@@ -1,0 +1,22 @@
+bcamarda@gmail.com - 52,929 emails
+8/9/2012 5:23PM
+
+Trial with NO validations and 1000 batch size
+
+1 minute intervals
+
+1.9.3p194 :002 > Email.all.count
+  Email Load (62.7ms)  SELECT "emails".* FROM "emails" 
+ => 3123 
+1.9.3p194 :003 > Email.all.count
+  Email Load (35.7ms)  SELECT "emails".* FROM "emails" 
+ => 4012 
+1.9.3p194 :004 > Email.all.count
+  Email Load (65.0ms)  SELECT "emails".* FROM "emails" 
+ => 5270 
+1.9.3p194 :005 > Email.all.count
+  Email Load (56.4ms)  SELECT "emails".* FROM "emails" 
+ => 6065 
+1.9.3p194 :006 > Email.all.count
+  Email Load (42.3ms)  SELECT "emails".* FROM "emails" 
+ => 6117 
