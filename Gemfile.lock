@@ -174,11 +174,8 @@ DEPENDENCIES
   mail
   oauth
   pg
-<<<<<<< HEAD
   pry-rails
-=======
   quiet_assets
->>>>>>> master
   rails (= 3.2.7)
   rspec
   rspec-rails
