@@ -36,21 +36,24 @@
   .attr("width", width)
   .attr("height", height);
 
-  /****** Axes/Scales *******/
+  /****** X Axes/Scales *******/
   xScale = d3.scale.linear()
   .domain([0, data.length - 1])
   .range([0, width - padding * 2]);
 
-  var xAxis = d3.svg.axis()
-  .scale(xScale)
-  .orient("bottom")
-  .ticks(24);
+  function hourLabel() {
+    return d3.range(1, 25).map(function(d) {
+      if (d < 12) { return d + " am"; }
+      if (d > 12) { return d - 12 + " pm"; }
+      if (d === 12) { return 12 + " pm"; }
+      if (d === 24) { return 12 + " am"; }
+    })
+  }
 
-  svg.append("g")
-  .attr("class", "axis")
-  .attr("transform", "translate(5, 0)")
-  .call(xAxis);
+  var xScaleOrdinal = d3.scale.ordinal();
+  var xAxis = d3.svg.axis().scale(xScaleOrdinal).orient("bottom");
 
+  /****** Y Axes/Scales *******/
   var drawYScale = function() {
     yScaleMax = d3.max(data, function(d) {
       return d.sent + d.received;
@@ -62,14 +65,6 @@
   };
 
   drawYScale();
-
-  var yAxis = d3.svg.axis()
-  .scale(yScale)
-  .orient("left");
-
-  svg.append("g")
-  .attr("class", "axis")
-  .call(yAxis);
 
   /******* Data viz *******/
   svg.selectAll("rect")
