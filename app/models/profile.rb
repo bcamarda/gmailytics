@@ -21,15 +21,14 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    batched_email_ids = batch_array(@imap.search(['ALL']), 100)
+    batched_email_ids = batch_array(@imap.search(['ALL']), 1000)
 
     
 
     batched_email_ids.each do |batch|
-
       batched_emails = @imap.fetch(batch,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])
 
-      batched_emails.each do |email|
+      batched_emails.each_with_index do |email,index|
         header = email.attr
 
         unless bad_email?(header)
@@ -50,13 +49,13 @@ class Profile < ActiveRecord::Base
             email.emails_tos.create(:recipient_type => 'to', :address => (address['mailbox'] + '@' + address['host']))
           end
 
-          unless envelope.cc.nil?
+          unless envelope.cc.nil? || envelope.cc[0]['mailbox'].nil?
             envelope.cc.each do |address|  
               email.emails_tos.create(:recipient_type => 'cc', :address => (address['mailbox'] + '@' + address['host']))
             end
           end
 
-          unless envelope.bcc.nil?
+          unless envelope.bcc.nil? || envelope.bcc[0]['mailbox'].nil?
             envelope.bcc.each do |address|  
               email.emails_tos.create(:recipient_type => 'bcc', :address => (address['mailbox'] + '@' + address['host']))
             end
@@ -140,7 +139,7 @@ class Profile < ActiveRecord::Base
   end
 
   def bad_email?(header)
-    header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? 
+    header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil?
   end
 
 end
