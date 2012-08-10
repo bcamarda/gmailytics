@@ -28,7 +28,10 @@ class Profile < ActiveRecord::Base
     batched_email_ids.each do |batch|
       batched_emails = @imap.fetch(batch,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])
 
+      puts batch.inspect
+      
       batched_emails.each_with_index do |email,index|
+        puts index
         header = email.attr
 
         unless bad_email?(header)
@@ -38,7 +41,7 @@ class Profile < ActiveRecord::Base
           email_params[:uid]      = header['X-GM-MSGID']
 
           envelope = header['ENVELOPE']
-          email_params[:subject]  = envelope.subject
+          email_params[:subject]  = envelope.subject[0..254]
           email_params[:date]     = envelope.date
           email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
           
