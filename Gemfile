@@ -10,6 +10,7 @@ gem 'oauth'
 gem 'gmail_xoauth'
 
 gem 'ruby-hmac'
+gem 'delayed_job_active_record'
 
  group :development, :test do
 

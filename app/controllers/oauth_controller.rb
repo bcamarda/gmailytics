@@ -23,7 +23,7 @@ class OauthController < ApplicationController
               puts '------------------------------------------------------------'
 
               @profile.update_attributes oauth_tokens
-              @profile.fetch_and_save_emails
+              @profile.delay.fetch_and_save_emails
           rescue Exception => e
               # Something went wrong, or user did not give you permissions on Gmail
               # Do something appropriate, potentially try again?
