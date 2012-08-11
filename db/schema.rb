@@ -10,8 +10,8 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended to check this file into your version control system.
-ActiveRecord::Schema.define(:version => 20120810195045) do
 
+ActiveRecord::Schema.define(:version => 20120811202001) do
 
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",   :default => 0
@@ -37,11 +37,12 @@ ActiveRecord::Schema.define(:version => 20120810195045) do
     t.datetime "updated_at",   :null => false
     t.string   "sentreceived"
     t.string   "seenunseen"
-    t.string   "from"
     t.string   "uid"
+    t.string   "from_address"
   end
 
   add_index "emails", ["date"], :name => "index_emails_on_date"
+  add_index "emails", ["from_address"], :name => "index_emails_on_from_address"
   add_index "emails", ["uid"], :name => "index_emails_on_uid"
 
   create_table "emails_tos", :force => true do |t|
@@ -51,6 +52,8 @@ ActiveRecord::Schema.define(:version => 20120810195045) do
     t.datetime "created_at",     :null => false
     t.datetime "updated_at",     :null => false
   end
+
+  add_index "emails_tos", ["address"], :name => "index_emails_tos_on_address"
 
   create_table "profiles", :force => true do |t|
     t.string   "email"

@@ -43,7 +43,7 @@ class Profile < ActiveRecord::Base
           envelope = header['ENVELOPE']
           email_params[:subject]  = envelope.subject[0..254]
           email_params[:date]     = envelope.date
-          email_params[:from]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
+          email_params[:from_address]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
           
 
           email = self.emails.create(email_params)
