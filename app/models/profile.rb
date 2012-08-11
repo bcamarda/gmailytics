@@ -21,7 +21,7 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 100)
+    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 50)
 
     
 
@@ -32,6 +32,7 @@ class Profile < ActiveRecord::Base
       
       batched_emails.each_with_index do |email,index|
         puts index
+        puts email.inspect
         header = email.attr
 
         unless bad_email?(header)
@@ -82,19 +83,6 @@ class Profile < ActiveRecord::Base
   end
 
   private
-  def fetch_and_save_emails_helper(uid_ar, email_params)
-      @imap.select('[Gmail]/All Mail')
-
-      uid_ar.each do |id|
-        header = @imap.fetch(id,'ENVELOPE')[0].attr['ENVELOPE']
-
-        email_params[:subject]  = header.subject
-        email_params[:date]     = header.date
-        email_params[:uid]      = id
-
-        self.emails.create(email_params)
-      end
-  end
 
   def monkeypatch_imap
     # stolen (borrowed) from https://gist.github.com/2712611
@@ -167,6 +155,8 @@ class Profile < ActiveRecord::Base
   end
 
   def bad_email?(header)
-    header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil?
+    header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || 
+      header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil? || 
+      header['ENVELOPE'].from[0]['host'].nil? || header['ENVELOPE'].to[0]['host'].nil?
   end
 end
