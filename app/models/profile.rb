@@ -21,7 +21,7 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 50)
+    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 1000)
 
     
 
