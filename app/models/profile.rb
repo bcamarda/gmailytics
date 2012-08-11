@@ -23,16 +23,14 @@ class Profile < ActiveRecord::Base
 
     batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 1000)
 
-    
-
     batched_email_ids.each do |batch|
       batched_emails = @imap.fetch(batch,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])
 
-      puts batch.inspect
+      audit_imap(batch.inspect)
       
       batched_emails.each_with_index do |email,index|
-        puts index
-        puts email.inspect
+        audit_imap(index)
+        audit_imap(email.inspect)
         header = email.attr
 
         unless bad_email?(header)
