@@ -37,7 +37,15 @@ class Profile < ActiveRecord::Base
 
         unless bad_email?(header)
           email_params = {}
-          header['X-GM-LABELS'].include?(:Sent) ? email_params[:sentreceived] = :sent  : email_params[:sentreceived] = :received
+          
+          if header['X-GM-LABELS'].include?(:Sent) 
+            email_params[:sentreceived] = :sent
+          elsif header['X-GM-LABELS'].include?(:Received)
+            email_params[:sentreceived] = :received
+          elsif header['X-GM-LABELS'].include?(:Draft)
+            email_params[:sentreceived] = :draft
+          end
+          
           header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
           email_params[:uid]      = header['X-GM-MSGID']
 
