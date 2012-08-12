@@ -12,6 +12,7 @@ gem 'gmail_xoauth'
 
 gem 'ruby-hmac'
 gem 'delayed_job_active_record'
+gem 'hirefireapp'
 
  group :development, :test do
 
