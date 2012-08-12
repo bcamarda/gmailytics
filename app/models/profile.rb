@@ -3,7 +3,7 @@ class Profile < ActiveRecord::Base
   require 'mail'
   require 'gmail_xoauth'
 
-  attr_accessible :email, :password, :oauth_token, :oauth_token_secret
+  attr_accessible :email, :oauth_token, :oauth_token_secret
 
   has_many :emails
 
