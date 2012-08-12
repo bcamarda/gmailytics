@@ -1,0 +1,6 @@
+var createSpamGraph = function (data) {
+	
+
+
+	
+}
