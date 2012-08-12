@@ -3,7 +3,7 @@ class Profile < ActiveRecord::Base
   require 'mail'
   require 'gmail_xoauth'
 
-  attr_accessible :email, :password, :oauth_token, :oauth_token_secret
+  attr_accessible :email, :oauth_token, :oauth_token_secret
 
   has_many :emails
 
@@ -38,10 +38,10 @@ class Profile < ActiveRecord::Base
           
           if header['X-GM-LABELS'].include?(:Sent) 
             email_params[:sentreceived] = :sent
-          elsif header['X-GM-LABELS'].include?(:Received)
-            email_params[:sentreceived] = :received
           elsif header['X-GM-LABELS'].include?(:Draft)
             email_params[:sentreceived] = :draft
+          else
+            email_params[:sentreceived] = :received
           end
           
           header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen

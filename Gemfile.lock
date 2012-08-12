@@ -61,6 +61,7 @@ GEM
     gmail_xoauth (0.3.2)
       oauth (>= 0.3.6)
     hike (1.2.1)
+    hirefireapp (0.0.8)
     i18n (0.6.0)
     journey (1.0.4)
     jquery-rails (2.0.2)
@@ -169,6 +170,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   delayed_job_active_record
   gmail_xoauth
+  hirefireapp
   jquery-rails
   launchy
   mail

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120811202001) do
+ActiveRecord::Schema.define(:version => 20120812064419) do
 
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",   :default => 0
@@ -57,7 +57,6 @@ ActiveRecord::Schema.define(:version => 20120811202001) do
 
   create_table "profiles", :force => true do |t|
     t.string   "email"
-    t.string   "password"
     t.string   "oauth_token"
     t.string   "oauth_token_secret"
     t.datetime "created_at",         :null => false
