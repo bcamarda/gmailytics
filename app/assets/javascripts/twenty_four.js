@@ -91,7 +91,7 @@ var createTwentyFourGraph = function (data) {
 
     var width = 400, height = 400, padding = 20;
     /***** SVG setup ******/
-    var svg = d3.select("body").append("svg:svg")
+    var svg = d3.select(html_element).append("svg:svg")
     .attr("width", width)
     .attr("height", height);
 
