@@ -15,7 +15,7 @@ class ProfilesController < ApplicationController
   end
 
   def show
-    @profile = Profile.find_by_id(params[:id])
+    @profile = Profile.find_by_slug(params[:id])
 
     respond_to do |format|
       format.json { render :json => @profile.get_graph_data }

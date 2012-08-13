@@ -3,9 +3,17 @@ class Profile < ActiveRecord::Base
   require 'mail'
   require 'gmail_xoauth'
 
-  attr_accessible :email, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at
+  attr_accessible :email, :slug, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at
+
+  validates_uniqueness_of :slug
+
+  before_validation :generate_slug
 
   has_many :emails
+
+  def to_param
+    self.slug
+  end
 
   def fetch_and_save_emails
     self.update_attributes!(:imap_worker_started_at => Time.now)
@@ -81,6 +89,15 @@ class Profile < ActiveRecord::Base
 
 
   private
+
+  def generate_slug
+    self.slug ||= generate_keystring(16)
+  end
+
+  def generate_keystring(string_length)
+    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(o l 1 i)
+    Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+  end
 
   def establish_imap_connection
     @imap = Net::IMAP.new('imap.gmail.com', 993, true)
