@@ -1,0 +1,45 @@
+@import "bootstrap";
+@import "bootstrap-responsive";
+
+.masthead {
+  h1 {
+    font-size: 50px;
+  }
+  .lead {
+    padding-top: 10px;
+  }
+  margin-top: 80px;
+  text-align: center;
+}
+
+.soften {
+  -webkit-border-image: none;
+  background-color: transparent;
+  background-image: -webkit-linear-gradient(left, transparent, rgba(0, 0, 0, 0.0976563), transparent);
+  border-bottom-color: #333;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-left-color: #333;
+  border-left-style: none;
+  border-left-width: 0px;
+  border-right-color: #333;
+  border-right-style: none;
+  border-right-width: 0px;
+  border-top-color: #333;
+  border-top-style: none;
+  border-top-width: 0px;
+  color: #333;
+  display: block;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  height: 2px;
+  line-height: 18px;
+  margin-bottom: 54px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 54px;
+  width: 1170px;
+}
+.signIn {
+  text-align: center;
+}

@@ -1,4 +1,15 @@
-<%= form_for @profile do |f| %>
-  <%= f.text_field :email %>
-  <%= f.submit %>
-<% end %>
+<div class="well">
+  <div class="masthead">
+    <h1>Welcome to Gmailytics!</h1>
+    <div class="lead">Visualize your Gmail Existence</div>
+    <div class="signIn">
+      <div class="form-inline">
+        <%= form_for @profile do |f| %>
+          <%= f.text_field :email %>
+          <%= f.submit "Visualize", :class => "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+    <hr class="soften">
+  </div>
+</div>
