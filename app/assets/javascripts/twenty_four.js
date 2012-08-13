@@ -1,9 +1,21 @@
-var createTwentyFourGraph = function (data) {
+var createTwentyFourGraph = function (data, html_element) {
     var runViz = function (data) {
-      var xRange = ["4 pm", "5 pm", "6 pm", "7 pm", "8 pm", "9 pm",
-          "10 pm", "11 pm", "12 am", "1 am", "2 am", "3 am",
-          "4 am", "5 am", "6 am", "7 am", "8 am", "9 am",
-          "10 am", "11 am", "12 pm", "1 pm", "2 pm", "3 pm"];
+      var xLabels = ["7 am", "8 am", "9 am", "10 am", "11 am", "12 pm",
+          "1 pm", "2 pm", "3 pm", "4 pm", "5 pm", "6 pm",
+          "7 pm", "8 pm", "9 pm", "10 pm", "11 pm", "12 am",
+          "1 am", "2 am", "3 am", "4 am", "5 am", "6 am", ];
+
+      var utcOffset = function() {
+        var d = new Date;
+        return d.getTimezoneOffset() / 60;
+      }();
+
+      var remakeData = function() {
+        var temp_data = data.slice();
+        for (var i = 0; i < data.length; i++) {
+          data[i] = temp_data[(24 + i - utcOffset - 3) % 24];
+        }
+      }();
 
       var barWidth = width/data.length;
 
@@ -15,7 +27,7 @@ var createTwentyFourGraph = function (data) {
       var xScaleOrdinal = d3.scale.ordinal();
 
       xScaleOrdinal
-      .domain(xRange)
+      .domain(xLabels)
       .rangeRoundBands([0, width]);
 
       var xAxis = d3.svg.axis().scale(xScaleOrdinal).orient("bottom");
@@ -99,6 +111,18 @@ var createTwentyFourGraph = function (data) {
 
     return { "update": function(data) { 
 
+      var utcOffset = function() {
+        var d = new Date;
+        return d.getTimezoneOffset() / 60;
+      }();
+
+      var remakeData = function() {
+        var temp_data = data.slice();
+        for (var i = 0; i < data.length; i++) {
+          data[i] = temp_data[(24 + i - utcOffset - 3) % 24];
+        }
+      }();
+
       function drawYScale() {
         yScaleMax = d3.max(data, function(d) {
           return d.sent + d.received;
@@ -131,5 +155,5 @@ var createTwentyFourGraph = function (data) {
       redraw();
       redraw2();
     }
-    };
   };
+};
