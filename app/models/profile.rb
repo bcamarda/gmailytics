@@ -21,59 +21,73 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
 
-    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 1000)
-
+    batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 200)
     batched_email_ids.each do |batch|
-      batched_emails = @imap.fetch(batch,['ENVELOPE','FLAGS','X-GM-LABELS', 'X-GM-MSGID'])
+      begin
+        batched_emails = @imap.fetch(batch,["ENVELOPE","FLAGS","X-GM-LABELS", "X-GM-MSGID"])
+        batched_emails.each_with_index do |email,index|
+        
+          header = email.attr
 
-      audit_imap(batch.inspect)
-      
-      batched_emails.each_with_index do |email,index|
-        audit_imap(index)
-        audit_imap(email.inspect)
-        header = email.attr
-
-        unless bad_email?(header)
-          email_params = {}
-          
-          if header['X-GM-LABELS'].include?(:Sent) 
-            email_params[:sentreceived] = :sent
-          elsif header['X-GM-LABELS'].include?(:Draft)
-            email_params[:sentreceived] = :draft
-          else
-            email_params[:sentreceived] = :received
-          end
-          
-          header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
-          email_params[:uid]      = header['X-GM-MSGID']
-
-          envelope = header['ENVELOPE']
-          email_params[:subject]  = envelope.subject[0..254]
-          email_params[:date]     = envelope.date
-          email_params[:from_address]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
-          
-
-          email = self.emails.create(email_params)
-
-          envelope.to.each do |address|  
-            email.emails_tos.create(:recipient_type => 'to', :address => (address['mailbox'] + '@' + address['host']))
-          end
-
-          unless envelope.cc.nil? || envelope.cc[0]['mailbox'].nil?
-            envelope.cc.each do |address|  
-              email.emails_tos.create(:recipient_type => 'cc', :address => (address['mailbox'] + '@' + address['host']))
+          unless bad_email?(header)
+            email_params = {}
+            
+            if header['X-GM-LABELS'].include?(:Sent) 
+              email_params[:sentreceived] = :sent
+            elsif header['X-GM-LABELS'].include?(:Draft)
+              email_params[:sentreceived] = :draft
+            else
+              email_params[:sentreceived] = :received
             end
-          end
+            
+            header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+            email_params[:uid]      = header['X-GM-MSGID']
 
-          unless envelope.bcc.nil? || envelope.bcc[0]['mailbox'].nil?
-            envelope.bcc.each do |address|  
-              email.emails_tos.create(:recipient_type => 'bcc', :address => (address['mailbox'] + '@' + address['host']))
+            envelope = header['ENVELOPE']
+            email_params[:subject]  = envelope.subject.force_encoding("UTF-8")[0..254]
+            email_params[:date]     = envelope.date
+            email_params[:from_address]     = envelope.from[0]['mailbox'] + '@' + envelope.from[0]['host']
+            
+
+            email = self.emails.new(email_params)
+            email.save!
+
+            envelope.to.each do |address|  
+              email.emails_tos.new(:recipient_type => 'to', :address => (address['mailbox'] + '@' + address['host'])).save!
+            end
+
+            unless envelope.cc.nil? || envelope.cc[0]['mailbox'].nil?
+              envelope.cc.each do |address|  
+                email.emails_tos.new(:recipient_type => 'cc', :address => (address['mailbox'] + '@' + address['host'])).save!
+              end
+            end
+
+            unless envelope.bcc.nil? || envelope.bcc[0]['mailbox'].nil?
+              envelope.bcc.each do |address|  
+                email.emails_tos.new(:recipient_type => 'bcc', :address => (address['mailbox'] + '@' + address['host'])).save!
+              end
             end
           end
         end
-      end
-    end
       
+      rescue => exception
+        audit_imap batch.inspect
+        audit_imap exception.message
+
+        @imap = Net::IMAP.new('imap.gmail.com', 993, true)
+
+        @imap.authenticate('XOAUTH', email,
+          :consumer_key => 'anonymous',
+          :consumer_secret => 'anonymous',
+          :token => oauth_token,
+          :token_secret => oauth_token_secret
+        )
+
+        @imap.select('[Gmail]/All Mail')
+     
+        monkeypatch_imap 
+      end
+    end   
   end
 
   def get24hourgraph

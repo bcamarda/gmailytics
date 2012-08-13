@@ -1,6 +1,6 @@
 var drawGraphs = function(path) {
   $.getJSON(path, function(data) {
-    var graphTwentyFour = createTwentyFourGraph(data.twentyFour);
+    var graphTwentyFour = createTwentyFourGraph(data.twentyFour, ".graphs");
 
     setInterval(function() {
       $.getJSON(path, function(data) {
