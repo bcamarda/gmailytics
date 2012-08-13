@@ -10,9 +10,9 @@ gem 'gmail_xoauth'
 gem 'ruby-hmac'
 gem 'delayed_job_active_record'
 gem 'hirefireapp'
+gem 'bootstrap-sass'
 
  group :development, :test do
-
     gem 'rspec'
     gem 'webrat'
     gem 'rspec-rails'
