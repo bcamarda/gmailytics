@@ -8,4 +8,16 @@ var drawGraphs = function(path) {
       });
     }, 2000);
   });
-};
+
+
+  $.getJSON(path, function(data)) {
+  	var graphTopRecipients = createTopRecipients(data.topRecipients);
+
+  	setInterval(function() {
+  		$.getJSON(path, function(data) {
+  			graphTopRecipients.update(data.topRecipients);
+  		});
+  	}, 2000);
+  });
+
+});
