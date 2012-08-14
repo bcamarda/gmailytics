@@ -1,23 +1,12 @@
-<%= @profile.email %>
-<div class="graphs"></div>
-
-<style type="text/css" media="all">
-  body {
-    background-color: beige;
-  }
-  .axis path, .axis line {
-    fill: none;
-    stroke: black;
-    shape-rendering: crispEdges;
-  }
-  .axis text {
-    font-family: sans-serif;
-    font-size: 11px;
-  }
-</style>
+<div class="masthead lead"><%= @profile.email %></div>
+<hr class="soften">
+<div class="graphs well"></div>
 
 <script src="http://d3js.org/d3.v2.js"></script>
 
 <script>
   $(document).ready( drawGraphs("<%= profile_path(@profile) %>"))
 </script>
+<div class="center">
+<%= button_to "Destroy All Data", '#', :method => :delete, :class => "btn btn-danger btn-large vt-p" %>
+</div>
