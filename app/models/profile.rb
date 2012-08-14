@@ -9,7 +9,7 @@ class Profile < ActiveRecord::Base
 
   before_validation :generate_slug
 
-  has_many :emails
+  has_many :emails, :dependent => :destroy
 
   def to_param
     self.slug
@@ -83,10 +83,23 @@ class Profile < ActiveRecord::Base
     jsonable_data_hash = {}
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
+    jsonable_data_hash[:topRecipients] = get_top_recipients   
     return jsonable_data_hash
   end
 
-
+  def get_top_recipients
+    recipients_raw = Profile.find_by_sql(
+          "SELECT e_t.address, COUNT(*) AS Count, EXTRACT(month FROM e.date) AS Month
+          FROM emails e, emails_tos e_t 
+          WHERE e.sentreceived = 'sent' AND e_t.email_id = e.id 
+          GROUP BY e_t.address, Month 
+          ORDER BY Month, Count DESC;")
+    recipients = []
+    recipients_raw.each do |r|
+      recipients << Recipient.new(r.address, r.count.to_i, r.month.to_i) 
+    end    
+    Recipient.get_top(recipients, 5)
+  end
 
   private
 
@@ -95,7 +108,7 @@ class Profile < ActiveRecord::Base
   end
 
   def generate_keystring(string_length)
-    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(o l 1 i)
+    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
     Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
   end
 
@@ -187,7 +200,8 @@ class Profile < ActiveRecord::Base
   def bad_email?(header)
     header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || 
       header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil? || 
-      header['ENVELOPE'].from[0]['host'].nil? || header['ENVELOPE'].to[0]['host'].nil?
+      header['ENVELOPE'].from[0]['host'].nil? || header['ENVELOPE'].to[0]['host'].nil? ||
+      header['ENVELOPE'].date.nil?
   end
 
   def get_24_hour_graph

@@ -1,9 +1,9 @@
 <div class="masthead lead"><%= @profile.email %></div>
 <hr class="soften">
+<div class="status"></div>
 <div class="graphs well"></div>
 
 <script src="http://d3js.org/d3.v2.js"></script>
-
 <script>
   $(document).ready( drawGraphs("<%= profile_path(@profile) %>"))
 </script>
