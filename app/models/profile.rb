@@ -236,8 +236,9 @@ class Profile < ActiveRecord::Base
     just
     like
     made me more most my
-    no not
+    new no not
     of off on once one only or other our out over own
+    pm
     re
     said she should so some such 
     than that the their them then there these they this those through to too
