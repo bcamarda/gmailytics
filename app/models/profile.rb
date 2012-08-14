@@ -101,17 +101,6 @@ class Profile < ActiveRecord::Base
     Recipient.get_top(recipients, 5)
   end
 
-  private
-
-  def generate_slug
-    self.slug ||= generate_keystring(16)
-  end
-
-  def generate_keystring(string_length)
-    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
-    Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
-  end
-
   def establish_imap_connection
     @imap = Net::IMAP.new('imap.gmail.com', 993, true)
 
@@ -126,6 +115,18 @@ class Profile < ActiveRecord::Base
  
     monkeypatch_imap_instance(@imap) #Used to add X-GM-LABELS support for Net::IMAP
   end
+  
+  private
+
+  def generate_slug
+    self.slug ||= generate_keystring(16)
+  end
+
+  def generate_keystring(string_length)
+    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
+    Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+  end
+
 
   def monkeypatch_imap_instance(imap)
     # stolen (borrowed) from https://gist.github.com/2712611
