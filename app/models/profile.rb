@@ -83,7 +83,7 @@ class Profile < ActiveRecord::Base
     jsonable_data_hash = {}
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
-    jsonable_data_hash[:topRecipients] = get_top_recipients   
+    jsonable_data_hash[:wordCloud] = get_word_cloud
     return jsonable_data_hash
   end
 
@@ -214,6 +214,51 @@ class Profile < ActiveRecord::Base
       end
     end
     hourly_array
+  end
+
+  def get_word_cloud
+    common_dict = %w(
+    a about after again against all an another any and are as at
+    be being been before but by
+    can could
+    did do don't down
+    each 
+    few from for fwd
+    get got great
+    had has have he her here his him himself hers how
+    i if im in into is it its
+    just
+    like
+    made me more most my
+    no not
+    of off on once one only or other our out over own
+    re
+    said she should so some such 
+    than that the their them then there these they this those through to too
+    under until up 
+    very
+    was wasnt we were were what when where which while who why will with would wouldnt
+    you your) 
+
+    freq_hash = Hash.new(0)
+    self.emails.each do |email|
+      email.subject.split.each do |word|
+        word = word.gsub(/\W/,'')
+        freq_hash[word] += 1 unless word.empty? || common_dict.include?(word.downcase)
+      end
+    end
+    
+    word_hash = freq_hash.map { |word, count| { :text => word , :size => count } }
+    
+    unless word_hash.empty?
+      word_hash.sort_by! { |hsh| - hsh[:size] }
+      word_hash = word_hash.slice(0, 50)
+
+      highest_frequency = word_hash.first[:size]
+      word_hash.each { |hsh| hsh[:size] = (hsh[:size] * 100) / highest_frequency }
+    end
+
+    word_hash
   end
 
   def get_profile_status
