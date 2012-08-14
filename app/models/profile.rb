@@ -3,23 +3,22 @@ class Profile < ActiveRecord::Base
   require 'mail'
   require 'gmail_xoauth'
 
-  attr_accessible :email, :oauth_token, :oauth_token_secret
+  attr_accessible :email, :slug, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at
+
+  validates_uniqueness_of :slug
+
+  before_validation :generate_slug
 
   has_many :emails
 
+  def to_param
+    self.slug
+  end
+
   def fetch_and_save_emails
-    @imap = Net::IMAP.new('imap.gmail.com', 993, true)
+    self.update_attributes!(:imap_worker_started_at => Time.now)
 
-    @imap.authenticate('XOAUTH', email,
-      :consumer_key => 'anonymous',
-      :consumer_secret => 'anonymous',
-      :token => oauth_token,
-      :token_secret => oauth_token_secret
-    )
-
-    @imap.select('[Gmail]/All Mail')
- 
-    monkeypatch_imap #Used to add X-GM-LABELS support for Net::IMAP
+    establish_imap_connection
 
     batched_email_ids = batch_array(@imap.search(['SINCE', '1-Aug-2011']), 200)
     batched_email_ids.each do |batch|
@@ -74,39 +73,50 @@ class Profile < ActiveRecord::Base
         audit_imap batch.inspect
         audit_imap exception.message
 
-        @imap = Net::IMAP.new('imap.gmail.com', 993, true)
-
-        @imap.authenticate('XOAUTH', email,
-          :consumer_key => 'anonymous',
-          :consumer_secret => 'anonymous',
-          :token => oauth_token,
-          :token_secret => oauth_token_secret
-        )
-
-        @imap.select('[Gmail]/All Mail')
-     
-        monkeypatch_imap 
-      end
-    end   
-  end
-
-  def get24hourgraph
-    hourly_array = (0..23).map { {"sent" => 0, "received" => 0 } }
-    self.emails.each do |email|
-      if email[:sentreceived] == "sent"
-        hourly_array[email.date.hour]["sent"] += 1
-      else
-        hourly_array[email.date.hour]["received"] += 1
+        establish_imap_connection
       end
     end
-    hourly_array
+    self.update_attributes!(:imap_worker_completed_at => Time.now)
   end
+
+  def get_graph_data
+    jsonable_data_hash = {}
+    jsonable_data_hash[:profileStatus] = get_profile_status
+    jsonable_data_hash[:twentyFour] = get_24_hour_graph
+    return jsonable_data_hash
+  end
+
+
 
   private
 
-  def monkeypatch_imap
+  def generate_slug
+    self.slug ||= generate_keystring(16)
+  end
+
+  def generate_keystring(string_length)
+    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(o l 1 i)
+    Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+  end
+
+  def establish_imap_connection
+    @imap = Net::IMAP.new('imap.gmail.com', 993, true)
+
+    @imap.authenticate('XOAUTH', email,
+      :consumer_key => 'anonymous',
+      :consumer_secret => 'anonymous',
+      :token => oauth_token,
+      :token_secret => oauth_token_secret
+    )
+
+    @imap.select('[Gmail]/All Mail')
+ 
+    monkeypatch_imap_instance(@imap) #Used to add X-GM-LABELS support for Net::IMAP
+  end
+
+  def monkeypatch_imap_instance(imap)
     # stolen (borrowed) from https://gist.github.com/2712611
-    class << @imap.instance_variable_get("@parser")
+    class << imap.instance_variable_get("@parser")
 
       # copied from the stdlib net/smtp.rb
       def msg_att
@@ -178,5 +188,33 @@ class Profile < ActiveRecord::Base
     header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || 
       header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil? || 
       header['ENVELOPE'].from[0]['host'].nil? || header['ENVELOPE'].to[0]['host'].nil?
+  end
+
+  def get_24_hour_graph
+    hourly_array = (0..23).map { {"sent" => 0, "received" => 0 } }
+    self.emails.each do |email|
+      if email[:sentreceived] == "sent"
+        hourly_array[email.date.hour]["sent"] += 1
+      else
+        hourly_array[email.date.hour]["received"] += 1
+      end
+    end
+    hourly_array
+  end
+
+  def get_profile_status
+    status_hash = {}
+    if imap_worker_started_at
+      status_hash[:imap_worker_started_at] = imap_worker_started_at.strftime("%a %b %d, %Y")
+      status_hash[:emails_analyzed] = self.emails.count
+      if self.emails.count > 0
+        status_hash[:first_email_analyzed_date] = self.emails.first.date.strftime("%a %b %d, %Y")
+        status_hash[:last_email_analyzed_date] = self.emails.last.date.strftime("%a %b %d, %Y")
+
+        status_hash[:imap_worker_completed_at] = imap_worker_completed_at.strftime("%a %b %d, %Y") if imap_worker_completed_at
+      end
+ 
+    end
+    status_hash
   end
 end
