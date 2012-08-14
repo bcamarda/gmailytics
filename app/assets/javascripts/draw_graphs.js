@@ -1,24 +1,21 @@
 var drawGraphs = function(path) {
   $.getJSON(path, function(data) {
-    var graphTwentyFour = createTwentyFourGraph(data.twentyFour, ".graphs");
 
-    setInterval(function() {
+  	var boxProfileStatus 	= createProfileStatusBox(data.profileStatus, ".status");
+    var graphTwentyFour 	= createTwentyFourGraph(data.twentyFour, ".graphs");
+    var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
+
+    var pollingFunction = setInterval(function() {
       $.getJSON(path, function(data) {
-        graphTwentyFour.update(data.twentyFour);    
+        boxProfileStatus.update(data.profileStatus);
+        graphTwentyFour.update(data.twentyFour);
+        console.log('Polled for updated data');
+        
+        if (data.profileStatus.imap_worker_completed_at) {
+          clearInterval(pollingFunction);
+          console.log('Profile marked as complete. Polling stopped.')
+        }   
       });
     }, 2000);
   });
-
-
-  $.getJSON(path, function(data) {
-  	console.log(data.topRecipients);
-  	var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
-														 
-  	// setInterval(function() {
-  	// 	$.getJSON(path, function(data) {
-  	// 		graphTopRecipients.update(data.topRecipients);
-  	// 	});
-  	// }, 2000);
-  });
-
 };
