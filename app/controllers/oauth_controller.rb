@@ -23,14 +23,17 @@ class OauthController < ApplicationController
               puts '------------------------------------------------------------'
 
               @profile.update_attributes oauth_tokens
+              @profile.establish_imap_connection
               @profile.delay.fetch_and_save_emails
+              redirect_to profile_path(@profile)
           rescue Exception => e
               # Something went wrong, or user did not give you permissions on Gmail
               # Do something appropriate, potentially try again?
             flash[:error] = "There was an error while authenticating with Gmail. Please try again."
             warn flash[:error]
+            redirect_to root_path
           end          
-          redirect_to profile_path(@profile)
+          
         end
     end
 end
