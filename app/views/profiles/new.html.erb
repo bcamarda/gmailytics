@@ -5,7 +5,7 @@
     <div class="center">
       <div class="form-inline">
         <%= form_for @profile do |f| %>
-          <%= f.text_field :email %>
+          <%= f.text_field :email, :placeholder => 'Your Gmail Address' %>
           <%= f.submit "Visualize", :class => "btn btn-primary" %>
         <% end %>
       </div>
