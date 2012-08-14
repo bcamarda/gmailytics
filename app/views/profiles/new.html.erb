@@ -1,4 +1,19 @@
-<%= form_for @profile do |f| %>
-  <%= f.text_field :email %>
-  <%= f.submit %>
-<% end %>
+<div class="well">
+  <div class="masthead">
+    <h1>Welcome to Gmailytics!</h1>
+    <div class="lead">Visualize your Gmail Existence</div>
+    <div class="center">
+      <div class="form-inline">
+        <%= form_for @profile do |f| %>
+          <%= f.text_field :email %>
+          <%= f.submit "Visualize", :class => "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+    <hr class="soften">
+  </div>
+  <div class="graphs center">
+    <script src="http://d3js.org/d3.v2.js"></script>
+    <script>$(document).ready(function() { frontPage(); });</script>
+  </div>
+</div>
