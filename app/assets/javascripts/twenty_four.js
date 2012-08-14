@@ -39,7 +39,8 @@ var createTwentyFourGraph = function (data, html_element) {
       .call(xAxis);
 
       svg.selectAll("g text")
-      .attr("transform", "rotate(60)translate(15, 10)");
+      .attr("transform", "rotate(60)translate(15, 10)")
+      .attr("class", "chartText");
 
       /****** Y Axes/Scales *******/
       function drawYScale() {
