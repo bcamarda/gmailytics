@@ -10,11 +10,11 @@ var createTopRecipients = function (data, html_element) {
       .attr("width", width)
       .attr("height", height);
   
-      xScale = d3.scale.linear()
+      var xScale = d3.scale.linear()
       .domain([0, data.length - 1])
       .range([0, width - padding * 2]);
 
-      yScale = d3.scale.linear()
+      var yScale = d3.scale.linear()
       .domain([0, 500])
       .range([0, height - padding * 2]);
 
@@ -119,4 +119,4 @@ var createTopRecipients = function (data, html_element) {
 	
   runViz(data);
 
-}
+      }
