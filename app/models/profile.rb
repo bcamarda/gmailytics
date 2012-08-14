@@ -187,7 +187,8 @@ class Profile < ActiveRecord::Base
   def bad_email?(header)
     header['ENVELOPE'].subject.nil? || header['ENVELOPE'].from.nil? || header['ENVELOPE'].to.nil? || 
       header['ENVELOPE'].from[0]['mailbox'].nil? || header['ENVELOPE'].to[0]['mailbox'].nil? || 
-      header['ENVELOPE'].from[0]['host'].nil? || header['ENVELOPE'].to[0]['host'].nil?
+      header['ENVELOPE'].from[0]['host'].nil? || header['ENVELOPE'].to[0]['host'].nil? ||
+      header['ENVELOPE'].date.nil?
   end
 
   def get_24_hour_graph
