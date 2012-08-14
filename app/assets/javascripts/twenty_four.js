@@ -68,16 +68,9 @@ var createTwentyFourGraph = function (data, html_element) {
       .duration(2000)
       .attr("y", function(d) { return height - yScale(d.sent); } )
       .attr("height", function(d) { return yScale(d.sent); } )
-      .attr("fill", "goldenrod");
-
-      function redraw() {
-        svg.selectAll("rect")
-        .data(data)
-        .transition()
-        .duration(2000)
-        .attr("y", function(d) { return height - yScale(d.sent); } )
-        .attr("height", function(d) { return yScale(d.sent); } );
-      }
+      .attr("fill", "goldenrod")
+      .attr("class", "sent")
+      .attr("count", function(d) { return Math.floor(d.sent) + " sent"; });
 
       svg.selectAll("something")
       .data(data)
@@ -92,16 +85,16 @@ var createTwentyFourGraph = function (data, html_element) {
       .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
       .attr("height", function(d) { return yScale(d.received); } )
       .attr("fill", "teal")
-      .attr("class", function(d, i) { return "received"; });
+      .attr("class", "received")
+      .attr("count", function(d) { return Math.floor(d.received) + " received"; });
 
-      function redraw2() {
-        svg.selectAll("rect.received")
-        .data(data)
-        .transition()
-        .duration(2000)
-        .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
-        .attr("height", function(d) { return yScale(d.received); } );
-      }
+      $('svg rect').tipsy({ 
+        gravity: 'w', 
+        html: true, 
+        title: function() { return $(this).attr("count"); },
+        fade: true,
+        opacity: 0.8
+      });
     }
 
     var width = 400, height = 400, padding = 20;
@@ -113,6 +106,7 @@ var createTwentyFourGraph = function (data, html_element) {
     runViz(data);
 
     return { "update": function(data) { 
+      var yScaleMax, yScale;
 
       var utcOffset = function() {
         var d = new Date;
@@ -142,7 +136,8 @@ var createTwentyFourGraph = function (data, html_element) {
         .transition()
         .duration(2000)
         .attr("y", function(d) { return height - yScale(d.sent); } )
-        .attr("height", function(d) { return yScale(d.sent); } );
+        .attr("height", function(d) { return yScale(d.sent); } )
+        .attr("count", function(d) { return Math.floor(d.sent) + " sent"; });
       }
 
       function redraw2() {
@@ -151,7 +146,8 @@ var createTwentyFourGraph = function (data, html_element) {
         .transition()
         .duration(2000)
         .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
-        .attr("height", function(d) { return yScale(d.received); } );
+        .attr("height", function(d) { return yScale(d.received); } )
+        .attr("count", function(d) { return Math.floor(d.received) + " received"; });
       }
 
       drawYScale();
