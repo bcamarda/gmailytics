@@ -95,7 +95,7 @@ class Profile < ActiveRecord::Base
   end
 
   def generate_keystring(string_length)
-    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(o l 1 i)
+    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
     Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
   end
 
