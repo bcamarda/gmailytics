@@ -7,7 +7,7 @@ var drawGraphs = function(path) {
     //var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
 
     var pollingFunction = setInterval(function() {
-      $.getJSON(path, function(data) {
+      $.getJSON(path + '?last_email_at=' + data.profileStatus.last_email_at, function(data) {
         boxProfileStatus.update(data.profileStatus);
         graphTwentyFour.update(data.twentyFour);
         graphWordCloud.update(data.wordCloud);
