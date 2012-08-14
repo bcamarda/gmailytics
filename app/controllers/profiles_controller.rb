@@ -18,8 +18,9 @@ class ProfilesController < ApplicationController
     @profile = Profile.find_by_id(params[:id])
 
     respond_to do |format|
-      format.json { render :json => { :twentyFour => @profile.get24hourgraph ,
-                                        :topRecipients => @profile.get_top_recipients} }
+      format.json { render :json => { :twentyFour => @profile.get24hourgraph , 
+                                        :topRecipients => @profile.get_top_recipients
+                                        } }
       format.html
     end
   end

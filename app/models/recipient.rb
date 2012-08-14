@@ -19,8 +19,26 @@ class Recipient
 			recipients << recipients_per_month[0..top_number-1]
 			recipients_per_month = []
 		end
-		recipients
+		
+		self.rearrange_data(recipients)
 	end
+
+	def self.rearrange_data(recipients)
+		new_ar = recipients.map do |recipient_array|	
+			hsh = {}
+			hsh['month'] = recipient_array.first.month
+			recipient_array.each_with_index do |recipient, index|
+				hsh.merge!( 
+					{
+						"sent#{index + 1}" => recipient.count,
+						"to#{index + 1}" => recipient.address
+					} )
+			end
+			hsh
+		end
+		new_ar
+	end
+
 
 
 
