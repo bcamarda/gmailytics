@@ -91,7 +91,7 @@ class Profile < ActiveRecord::Base
     recipients_raw = Profile.find_by_sql(
           "SELECT e_t.address, COUNT(*) AS Count, EXTRACT(month FROM e.date) AS Month
           FROM emails e, emails_tos e_t 
-          WHERE e.sentreceived = 'sent' AND e_t.email_id = e.id 
+          WHERE e.sentreceived = 'sent' AND e_t.email_id = e.id AND e_t.recipient_type = 'to'
           GROUP BY e_t.address, Month 
           ORDER BY Month, Count DESC;")
     recipients = []
