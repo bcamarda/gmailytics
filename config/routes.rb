@@ -5,6 +5,7 @@ root :to => 'profiles#new'
 
 resources :profiles
 match "/oauth/authenticate" => "oauth#create"
+match "/:id" => "profiles#show"
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'

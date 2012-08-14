@@ -25,7 +25,7 @@ class OauthController < ApplicationController
               @profile.update_attributes oauth_tokens
               @profile.establish_imap_connection
               @profile.delay.fetch_and_save_emails
-              redirect_to profile_path(@profile)
+              redirect_to "/#{@profile.slug}"
           rescue Exception => e
               # Something went wrong, or user did not give you permissions on Gmail
               # Do something appropriate, potentially try again?

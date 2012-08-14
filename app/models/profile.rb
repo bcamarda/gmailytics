@@ -3,7 +3,7 @@ class Profile < ActiveRecord::Base
   require 'mail'
   require 'gmail_xoauth'
 
-  attr_accessible :email, :slug, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at
+  attr_accessible :email, :slug, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at, :marked_as_deleted
 
   validates_uniqueness_of :slug
 
@@ -13,6 +13,10 @@ class Profile < ActiveRecord::Base
 
   def to_param
     self.slug
+  end
+
+  def deleted?
+    marked_as_deleted == 'deleted'
   end
 
   def fetch_and_save_emails
