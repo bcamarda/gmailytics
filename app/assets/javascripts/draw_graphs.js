@@ -4,6 +4,7 @@ var drawGraphs = function(path) {
   	var boxProfileStatus 	= createProfileStatusBox(data.profileStatus, ".status");
     var graphTwentyFour 	= createTwentyFourGraph(data.twentyFour, ".graphs");
     var graphWordCloud    = createWordCloudGraph(data.wordCloud, ".graphs");
+    var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
 
     var pollingFunction = setInterval(function() {
       $.getJSON(path, function(data) {

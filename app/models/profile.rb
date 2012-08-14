@@ -84,6 +84,7 @@ class Profile < ActiveRecord::Base
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
     jsonable_data_hash[:wordCloud] = get_word_cloud
+    jsonable_data_hash[:topRecipients] = get_top_recipients   
     return jsonable_data_hash
   end
 
@@ -230,7 +231,7 @@ class Profile < ActiveRecord::Base
     just
     like
     made me more most my
-    new no not
+    no not
     of off on once one only or other our out over own
     re
     said she should so some such 
