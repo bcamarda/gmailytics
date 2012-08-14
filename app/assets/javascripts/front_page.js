@@ -94,16 +94,16 @@ var frontPage = function() {
     .duration(2000)
     .attr("y", function(d) { return height - yScale(d.sent); }) 
     .attr("height", function(d) { return yScale(d.sent); } )
-    .attr("fill", "goldenrod")
+    .attr("fill", "goldenrod");
 
-    function redraw() {
-      svg.selectAll("rect")
-        .data(data)
-        .transition()
-        .duration(2000)
-        .attr("y", function(d) { return height - yScale(d.sent); }) 
-        .attr("height", function(d) { return yScale(d.sent); } );
-    }
+  function redraw() {
+    svg.selectAll("rect")
+      .data(data)
+      .transition()
+      .duration(2000)
+      .attr("y", function(d) { return height - yScale(d.sent); }) 
+      .attr("height", function(d) { return yScale(d.sent); } );
+  }
 
   svg.selectAll("something")
     .data(data)

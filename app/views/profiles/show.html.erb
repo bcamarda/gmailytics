@@ -4,9 +4,11 @@
 <div class="graphs well"></div>
 
 <script src="http://d3js.org/d3.v2.js"></script>
+<script src="https://raw.github.com/jasondavies/d3-cloud/master/d3.layout.cloud.js"></script>
+
 <script>
   $(document).ready( drawGraphs("<%= profile_path(@profile) %>"))
 </script>
 <div class="center">
-<%= button_to "Destroy All Data", '#', :method => :delete, :class => "btn btn-danger btn-large vt-p" %>
+<%= button_to "Delete Profile", profile_path(@profile), :method => :delete, :class => "btn btn-danger btn-large vt-p", :confirm => "Are you sure? Profile cannot be recovered after this step" %>
 </div>
