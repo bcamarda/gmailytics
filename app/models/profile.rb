@@ -9,7 +9,7 @@ class Profile < ActiveRecord::Base
 
   before_validation :generate_slug
 
-  has_many :emails
+  has_many :emails, :dependent => :destroy
 
   def to_param
     self.slug
