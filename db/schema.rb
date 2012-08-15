@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120813215238) do
+ActiveRecord::Schema.define(:version => 20120814225226) do
 
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",   :default => 0
@@ -64,6 +64,7 @@ ActiveRecord::Schema.define(:version => 20120813215238) do
     t.datetime "imap_worker_started_at"
     t.datetime "imap_worker_completed_at"
     t.string   "slug"
+    t.string   "marked_as_deleted"
   end
 
   add_index "profiles", ["slug"], :name => "index_profiles_on_slug"

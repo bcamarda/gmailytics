@@ -20,7 +20,7 @@ var createWordCloudGraph = function (data, html_element) {
         .text(function(d) { return d.text; });
   }
 
-  var drawCloud = function () {
+  var drawCloud = function (data) {
     d3.layout.cloud().size([width, height])
       .words(data)
       .timeInterval(10)
@@ -37,11 +37,11 @@ var createWordCloudGraph = function (data, html_element) {
 	 .attr("height", height)
    .attr("class", 'wordCloud');
 
-  drawCloud();
+  drawCloud(data);
 
 	return { 
     "update": function(data) {
-      drawCloud();
+      drawCloud(data);
     }
   }
 };
