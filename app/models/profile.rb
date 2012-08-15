@@ -43,7 +43,7 @@ class Profile < ActiveRecord::Base
               email_params[:sentreceived] = :received
             end
             
-            header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+            header['FLAGS'].include?(:Seen) ? email_params[:seen] = true  : email_params[:seen] = false
             email_params[:uid]      = header['X-GM-MSGID']
 
             envelope = header['ENVELOPE']
@@ -127,12 +127,13 @@ class Profile < ActiveRecord::Base
   private
 
   def generate_slug
-    self.slug ||= generate_keystring(16)
+    self.slug ||= generate_keystring
   end
 
-  def generate_keystring(string_length)
-    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
-    Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+  def generate_keystring
+    # char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
+    # Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+    18.times.map{ rand(10).to_s }.join.to_i
   end
 
 
