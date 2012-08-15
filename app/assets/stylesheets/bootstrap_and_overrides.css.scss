@@ -5,11 +5,18 @@
   h1 {
     font-size: 50px;
   }
-  .lead {
-    padding-top: 10px;
+  .slogan {
+    text-shadow: 3px 3px 4px #000;
+    font-size: 35px;
+    font-weight: 200;
+    padding-bottom: 25px;
   }
   margin-top: 80px;
   text-align: center;
+}
+
+input#profile_email {
+  width: 363px;
 }
 
 .soften {
@@ -46,4 +53,13 @@
 
 .chartText {
   fill: #757C82;
+}
+
+.border {
+  border: 10px #757A82 solid;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-left: 221px;
+  margin-right: 221px;
+  border-radius: 5px;
 }

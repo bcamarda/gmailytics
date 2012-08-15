@@ -1,19 +1,18 @@
 <div class="well">
   <div class="masthead">
-    <h1>Welcome to Gmailytics!</h1>
-    <div class="lead">Visualize your Gmail Existence</div>
+    <div class="slogan">Visualize your Gmail Existence</div>
     <div class="center">
       <div class="form-inline">
         <%= form_for @profile do |f| %>
           <%= f.text_field :email, :placeholder => 'Your Gmail Address' %>
-          <%= f.submit "Visualize", :class => "btn btn-primary" %>
+          <%= f.submit "Visualize", :class => "btn btn-primary giant" %>
         <% end %>
       </div>
     </div>
-    <hr class="soften">
   </div>
-  <div class="graphs center">
-    <script src="http://d3js.org/d3.v2.js"></script>
-    <script>$(document).ready(function() { frontPage(); });</script>
+  <hr class="soften">
+  <div class="graphs center border">
+      <script src="http://d3js.org/d3.v2.js"></script>
+      <script>$(document).ready(function() { frontPage(); });</script>
   </div>
 </div>
