@@ -22,7 +22,7 @@ class ProfilesController < ApplicationController
       redirect_to root_path
     else
       respond_to do |format|
-        format.json { render :json => @profile.get_graph_data }
+        format.json { render :json => @profile.get_graph_data(params[:last_email_id]) }
         format.html
       end
     end

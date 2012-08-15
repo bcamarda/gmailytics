@@ -83,8 +83,11 @@ class Profile < ActiveRecord::Base
     self.update_attributes!(:imap_worker_completed_at => Time.now)
   end
 
-  def get_graph_data
+  def get_graph_data(last_email_processed_id)
+
     jsonable_data_hash = {}
+    jsonable_data_hash[:lastEmailProcessedId] = get_new_emails(last_email_processed_id)
+
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
     jsonable_data_hash[:wordCloud] = get_word_cloud
@@ -222,6 +225,14 @@ class Profile < ActiveRecord::Base
     hourly_array
   end
 
+  def get_new_emails(last_email_processed_id = 0)
+    @new_emails = self.emails.where("emails.id > ?", last_email_processed_id )
+    puts '+++++++++++++++++++++++++++++++++++++'
+    puts @new_emails.inspect
+    puts @new_emails.empty? ? 0 : @new_emails.last.id 
+    @new_emails.empty? ? 0 : @new_emails.last.id 
+  end
+
   def get_word_cloud
     common_dict = %w(
     a about after again against all an another any and are as at
@@ -248,7 +259,7 @@ class Profile < ActiveRecord::Base
     you your) 
 
     freq_hash = Hash.new(0)
-    self.emails.each do |email|
+    @new_emails.each do |email|
       email.subject.split.each do |word|
         word = word.gsub(/\W/,'')
         freq_hash[word] += 1 unless word.empty? || common_dict.include?(word.downcase)
@@ -276,7 +287,6 @@ class Profile < ActiveRecord::Base
       if self.emails.count > 0
         status_hash[:first_email_analyzed_date] = self.emails.first.date.strftime("%a %b %d, %Y")
         status_hash[:last_email_analyzed_date] = self.emails.last.date.strftime("%a %b %d, %Y")
-
         status_hash[:imap_worker_completed_at] = imap_worker_completed_at.strftime("%a %b %d, %Y") if imap_worker_completed_at
       end
  

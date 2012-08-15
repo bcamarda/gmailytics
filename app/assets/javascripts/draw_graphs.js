@@ -1,4 +1,5 @@
 var drawGraphs = function(path) {
+
   $.getJSON(path, function(data) {
 
   	var boxProfileStatus 	= createProfileStatusBox(data.profileStatus, ".status");
@@ -6,8 +7,12 @@ var drawGraphs = function(path) {
     var graphWordCloud    = createWordCloudGraph(data.wordCloud, ".graphs");
     //var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
 
+    var lastEmailProcessedId = data.lastEmailProcessedId;
+
     var pollingFunction = setInterval(function() {
-      $.getJSON(path + '?last_email_at=' + data.profileStatus.last_email_at, function(data) {
+      $.getJSON(path + '?last_email_id=' + lastEmailProcessedId, function(data) {
+        lastEmailProcessedId = data.lastEmailProcessedId;
+        
         boxProfileStatus.update(data.profileStatus);
         graphTwentyFour.update(data.twentyFour);
         graphWordCloud.update(data.wordCloud);
