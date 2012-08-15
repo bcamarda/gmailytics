@@ -53,6 +53,23 @@ var createTwentyFourGraph = function (data, html_element) {
         yScale = d3.scale.linear()
         .domain([0, yScaleMax])
         .range([0, height - padding * 2]);
+
+        var yLabelsScale = d3.scale.linear()
+          .domain([0, yScaleMax])
+          .range([height - padding * 2, 0]);
+
+        var yAxis = d3.svg.axis()
+          .scale(yLabelsScale)
+          .orient("left");
+
+        svg.append("svg:g")
+          .attr("transform", "translate(35,39)")
+          .attr("fill", "none")
+          .attr("class", "ylabels")
+          .call(yAxis);
+
+        svg.selectAll("g text")
+          .attr("class", "chartText");
       }
 
       drawYScale();
@@ -130,6 +147,25 @@ var createTwentyFourGraph = function (data, html_element) {
         yScale = d3.scale.linear()
         .domain([0, yScaleMax])
         .range([0, height - padding * 2]);
+
+        var yLabelsScale = d3.scale.linear()
+          .domain([0, yScaleMax])
+          .range([height - padding * 2, 0]);
+
+        svg.selectAll(".ylabels").remove();
+
+        var yAxis = d3.svg.axis()
+          .scale(yLabelsScale)
+          .orient("left");
+
+        svg.append("svg:g")
+          .attr("transform", "translate(35,39)")
+          .attr("fill", "none")
+          .attr("class", "ylabels")
+          .call(yAxis);
+
+        svg.selectAll("g text")
+          .attr("class", "chartText");
       }
 
       function redraw() {
