@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120815222652) do
+ActiveRecord::Schema.define(:version => 20120816174631) do
 
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",   :default => 0
@@ -59,12 +59,12 @@ ActiveRecord::Schema.define(:version => 20120815222652) do
     t.string   "email"
     t.string   "oauth_token"
     t.string   "oauth_token_secret"
-    t.datetime "created_at",                            :null => false
-    t.datetime "updated_at",                            :null => false
+    t.datetime "created_at",                                               :null => false
+    t.datetime "updated_at",                                               :null => false
     t.datetime "imap_worker_started_at"
     t.datetime "imap_worker_completed_at"
-    t.string   "marked_as_deleted"
     t.integer  "slug",                     :limit => 8
+    t.boolean  "marked_as_deleted",                     :default => false
   end
 
 end

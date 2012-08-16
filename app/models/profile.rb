@@ -16,7 +16,7 @@ class Profile < ActiveRecord::Base
   end
 
   def deleted?
-    marked_as_deleted == 'deleted'
+    marked_as_deleted
   end
 
   def fetch_and_save_emails

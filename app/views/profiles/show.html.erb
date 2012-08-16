@@ -19,5 +19,5 @@
   $(document).ready( drawGraphs("<%= profile_path(@profile) %>"))
 </script>
 <div class="center">
-<%= button_to "Delete Profile", profile_path(@profile), :method => :delete, :class => "btn btn-danger btn-large vt-p", :confirm => "Are you sure? Profile cannot be recovered after this step" %>
+<%= button_to "Delete Profile", profile_path(@profile), :method => :delete, :class => "btn btn-danger btn-large vt-p", :confirm => "Are you sure? Profile cannot be accessed after this step" %>
 </div>
