@@ -9,6 +9,7 @@ var createWordCloudGraph = function (data, html_element) {
       .fontSize(function(d) { return d.size; })
       .on("end", 
         function (words) {
+          debugger;
           var fontSize = d3.scale.log().domain([10,1000]).range([10,100]);
           var fill = d3.scale.category20b();
           $(html_element + ' g').remove();
