@@ -109,6 +109,52 @@ class Profile < ActiveRecord::Base
     # Recipient.get_top(recipients, 5)
   end
 
+  def get_junk_mail
+    all_junk_mail = []
+    junk_mail = Profile.find_by_sql([
+      "SELECT *
+      FROM 
+      (
+        SELECT emails.from_address, count(*) AS total_count
+        FROM emails
+        WHERE emails.profile_id = '?' AND emails.seen = false
+        GROUP BY emails.from_address
+        ORDER BY total_count DESC
+        LIMIT 5
+      )
+      e1
+      JOIN 
+      (
+        SELECT emails.from_address, date_part('year', date) AS year, 
+        date_part('month', date) as month, 
+        count(*) AS num_count, rank() OVER (PARTITION BY date_part('year', date),
+        date_part('month', date) 
+        ORDER BY count(*) DESC, from_address ASC)
+        FROM emails
+        WHERE emails.profile_id = '?' AND emails.seen = false
+        GROUP BY emails.from_address, year, month
+      ) 
+      e2 
+      ON e1.from_address = e2.from_address
+      ORDER BY e2.year, e2.month, e2.num_count;", self.id, self.id
+      ])
+
+
+    rank_array = []
+
+    junk_mail.each do |email|
+      unless rank_array.include?(email.total_count)
+        rank_array << email.total_count
+      end
+    end
+
+    rank_array.sort!.reverse!
+
+    junk_mail.each do |email|
+      all_junk_mail << {date: Date.new(email.year.to_i, email.month.to_i), }
+    end
+  end
+
   def establish_imap_connection
     @imap = Net::IMAP.new('imap.gmail.com', 993, true)
 
