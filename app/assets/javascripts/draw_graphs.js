@@ -3,7 +3,7 @@ var drawGraphs = function(path) {
   $.getJSON(path, function(data) {
 
   	var boxProfileStatus 	= createProfileStatusBox(data.profileStatus, ".status");
-    var graphTwentyFour 	= createTwentyFourGraph(data.twentyFour, ".graphs");
+    var graphTwentyFour 	= createTwentyFourGraph(data.twentyFour, ".twentyFourBar");
     var graphSubjectWordCloud    = createWordCloudGraph(data.newEmailSubjectWordFrequency, ".subjectWordCloud");
     var graphReceivedWordCloud   = createWordCloudGraph(data.newEmailReceivedWordFrequency, ".receivedWordCloud");
     //var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");

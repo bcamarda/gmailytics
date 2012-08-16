@@ -6,8 +6,6 @@ var createProfileStatusBox = function (data, html_element) {
     var today = new Date();
 
     var progress = ((progressDate - startDate) / (today - startDate));
-    console.log(progress);
-    console.log(Math.round(progress * 100) + '%');
     $('.progress .bar').css('width', Math.round(progress * 100) + '%');
   };
 
