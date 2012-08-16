@@ -278,7 +278,7 @@ class Profile < ActiveRecord::Base
     
     unless word_hash.empty?
       word_hash.sort_by! { |hsh| - hsh[:size] }
-      word_hash = word_hash.slice(0, 50)
+      word_hash = word_hash.slice(0, 30)
     end
 
     word_hash
