@@ -2,9 +2,10 @@ var createWordCloudGraph = function (data, html_element) {
 
 
   var draw = function (words) {
+
     var fontSize = d3.scale.log().range([10, 100]);
     var fill = d3.scale.category20b();
-    $('.wordCloud g').remove();
+    $(html_element + ' g').remove();
     svg
       .append("g")
         .attr("transform", "translate(" + height / 2 + "," + width / 2 + ")")

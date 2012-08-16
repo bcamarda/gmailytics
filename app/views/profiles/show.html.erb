@@ -1,7 +1,10 @@
 <div class="masthead lead"><%= @profile.email %></div>
 <hr class="soften">
 <div class="status"></div>
-<div class="graphs well"></div>
+<div class="graphs well">
+	<span class="subjectWordCloud"></span>
+	<span class="receivedWordCloud"></span>
+</div>
 
 <script src="http://d3js.org/d3.v2.js"></script>
 <script src="https://raw.github.com/jasondavies/d3-cloud/master/d3.layout.cloud.js"></script>

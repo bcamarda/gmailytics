@@ -84,13 +84,16 @@ class Profile < ActiveRecord::Base
   end
 
   def get_graph_data(last_email_processed_id)
+    @new_emails = get_new_emails(last_email_processed_id)
+    @new_emails.empty? ? last_email_processed_id = 0 : last_email_processed_id = @new_emails.last.id
 
     jsonable_data_hash = {}
-    jsonable_data_hash[:lastEmailProcessedId] = get_new_emails(last_email_processed_id)
+    jsonable_data_hash[:lastEmailProcessedId] = last_email_processed_id 
 
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
-    jsonable_data_hash[:wordCloud] = get_word_cloud
+    jsonable_data_hash[:newEmailSubjectWordFrequency] = get_word_frequency(@new_emails, :subject)
+    jsonable_data_hash[:newEmailReceivedWordFrequency] = get_word_frequency(@new_emails, :from_address)
     jsonable_data_hash[:topRecipients] = get_top_recipients   
     return jsonable_data_hash
   end
@@ -227,14 +230,10 @@ class Profile < ActiveRecord::Base
   end
 
   def get_new_emails(last_email_processed_id = 0)
-    @new_emails = self.emails.where("emails.id > ?", last_email_processed_id )
-    puts '+++++++++++++++++++++++++++++++++++++'
-    puts @new_emails.inspect
-    puts @new_emails.empty? ? 0 : @new_emails.last.id 
-    @new_emails.empty? ? 0 : @new_emails.last.id 
+    self.emails.where("emails.id > ?", last_email_processed_id ).order("created_at DESC").limit(1000)
   end
 
-  def get_word_cloud
+  def get_word_frequency(email_set, property_method)
     common_dict = %w(
     a about after again against all an another any and are as at
     be being been before but by
@@ -260,11 +259,19 @@ class Profile < ActiveRecord::Base
     you your) 
 
     freq_hash = Hash.new(0)
-    @new_emails.each do |email|
-      email.subject.split.each do |word|
-        word = word.gsub(/\W/,'')
+    email_set.each do |email|
+
+      case property_method 
+      when :subject
+        email.subject.split.each do |word|
+          word = word.gsub(/\W/,'')
+          freq_hash[word] += 1 unless word.empty? || common_dict.include?(word.downcase)
+        end
+      when :from_address
+        word = email.from_address.split('@').first
         freq_hash[word] += 1 unless word.empty? || common_dict.include?(word.downcase)
       end
+
     end
     
     word_hash = freq_hash.map { |word, count| { :text => word , :size => count } }
@@ -272,9 +279,6 @@ class Profile < ActiveRecord::Base
     unless word_hash.empty?
       word_hash.sort_by! { |hsh| - hsh[:size] }
       word_hash = word_hash.slice(0, 50)
-
-      highest_frequency = word_hash.first[:size]
-      word_hash.each { |hsh| hsh[:size] = (hsh[:size] * 100) / highest_frequency }
     end
 
     word_hash
