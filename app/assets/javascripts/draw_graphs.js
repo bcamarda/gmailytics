@@ -5,6 +5,7 @@ var drawGraphs = function(path) {
   	var boxProfileStatus 	= createProfileStatusBox(data.profileStatus, ".status");
     var graphTwentyFour 	= createTwentyFourGraph(data.twentyFour, ".graphs");
     var graphWordCloud    = createWordCloudGraph(data.wordCloud, ".graphs");
+    var graphJunkmail     = createJunkmailGraph(data.junkmail, ".graphs")
     //var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
 
     var lastEmailProcessedId = data.lastEmailProcessedId;
@@ -16,11 +17,13 @@ var drawGraphs = function(path) {
         boxProfileStatus.update(data.profileStatus);
         graphTwentyFour.update(data.twentyFour);
         graphWordCloud.update(data.wordCloud);
+        graphJunkmail.update(data.junkmail)
         console.log('Polled for updated data');
         
         if (data.profileStatus.imap_worker_completed_at) {
           clearInterval(pollingFunction);
           console.log('Profile marked as complete. Polling stopped.')
+          console.log(data)
         }   
       });
     }, 2000);

@@ -91,7 +91,8 @@ class Profile < ActiveRecord::Base
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
     jsonable_data_hash[:wordCloud] = get_word_cloud
-    jsonable_data_hash[:topRecipients] = get_top_recipients   
+    jsonable_data_hash[:topRecipients] = get_top_recipients
+    jsonable_data_hash[:junkmail] = get_junkmail   
     return jsonable_data_hash
   end
 
@@ -107,52 +108,6 @@ class Profile < ActiveRecord::Base
     #   recipients << Recipient.new(r.address, r.count.to_i, r.month.to_i) 
     # end    
     # Recipient.get_top(recipients, 5)
-  end
-
-  def get_junk_mail
-    all_junk_mail = []
-    junk_mail = Profile.find_by_sql([
-      "SELECT *
-      FROM 
-      (
-        SELECT emails.from_address, count(*) AS total_count
-        FROM emails
-        WHERE emails.profile_id = '?' AND emails.seen = false
-        GROUP BY emails.from_address
-        ORDER BY total_count DESC
-        LIMIT 5
-      )
-      e1
-      JOIN 
-      (
-        SELECT emails.from_address, date_part('year', date) AS year, 
-        date_part('month', date) as month, 
-        count(*) AS num_count, rank() OVER (PARTITION BY date_part('year', date),
-        date_part('month', date) 
-        ORDER BY count(*) DESC, from_address ASC)
-        FROM emails
-        WHERE emails.profile_id = '?' AND emails.seen = false
-        GROUP BY emails.from_address, year, month
-      ) 
-      e2 
-      ON e1.from_address = e2.from_address
-      ORDER BY e2.year, e2.month, e2.num_count;", self.id, self.id
-      ])
-
-
-    rank_array = []
-
-    junk_mail.each do |email|
-      unless rank_array.include?(email.total_count)
-        rank_array << email.total_count
-      end
-    end
-
-    rank_array.sort!.reverse!
-
-    junk_mail.each do |email|
-      all_junk_mail << {date: Date.new(email.year.to_i, email.month.to_i), }
-    end
   end
 
   def establish_imap_connection
@@ -340,4 +295,91 @@ class Profile < ActiveRecord::Base
     end
     status_hash
   end
+
+  def get_junkmail
+    all_junkmail = Profile.find_by_sql([
+      "SELECT *
+      FROM 
+      (
+        SELECT emails.from_address, count(*) AS total_count
+        FROM emails
+        WHERE emails.profile_id = '?' AND emails.seen = false
+        GROUP BY emails.from_address
+        ORDER BY total_count DESC
+        LIMIT 5
+      )
+      e1
+      JOIN 
+      (
+        SELECT emails.from_address, date_part('year', date) AS year, 
+        date_part('month', date) as month, 
+        count(*) AS num_count, rank() OVER (PARTITION BY date_part('year', date),
+        date_part('month', date) 
+        ORDER BY count(*) DESC, from_address ASC)
+        FROM emails
+        WHERE emails.profile_id = '?' AND emails.seen = false
+        GROUP BY emails.from_address, year, month
+      ) 
+      e2 
+      ON e1.from_address = e2.from_address
+      ORDER BY e2.year, e2.month, e2.num_count;", self.id, self.id
+      ])
+
+
+    # I am not particularly proud of any of this code, but we need to get it working
+    # I'll refactor this later to make it less hideous.
+
+    object_array = [{ year: 2011, month: 7, email_one: 0, email_two: 0, email_three: 0, email_four: 0, email_five: 0}]
+    rank_array = []
+    unless self.emails.last.nil?
+      newest_email = self.emails.last
+
+      recent_date = Date.new(newest_email.date.year.to_i, newest_email.date.month.to_i)
+
+      all_junkmail.each do |email|
+        rank_array << email.total_count.to_i
+      end
+
+
+
+      rank_array.uniq!
+      rank_array.sort!
+      rank_array.reverse!
+
+
+      iterating_date = Date.new(2011, 8)
+      while iterating_date <= recent_date + 31
+        junk_one_total = 0
+        junk_two_total = 0
+        junk_three_total = 0
+        junk_four_total = 0
+        junk_five_total = 0
+
+        all_junkmail.each do |email|
+          email_date = Date.new(email.year.to_i, email.month.to_i) 
+          if email_date <= iterating_date
+            case rank_array.index(email.total_count.to_i)
+            when 0 then junk_one_total += email.num_count.to_i
+            when 1 then junk_two_total += email.num_count.to_i
+            when 2 then junk_three_total += email.num_count.to_i
+            when 3 then junk_four_total += email.num_count.to_i
+            when 4 then junk_five_total += email.num_count.to_i
+            end
+          end
+        end
+
+        if iterating_date > Date.today
+          insertion_date = Date.today
+        else
+          insertion_date = iterating_date
+        end
+        object_array << { year: insertion_date.year, month: (insertion_date.month - 1), email_one: junk_one_total, email_two: junk_two_total, email_three: junk_three_total, 
+          email_four: junk_four_total, email_five: junk_five_total }
+        iterating_date = Date.new((iterating_date + 31).year, (iterating_date + 31).month)
+      end  
+    end
+    object_array
+  end
+  
+
 end
