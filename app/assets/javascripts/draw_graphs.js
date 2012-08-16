@@ -22,10 +22,10 @@ var drawGraphs = function(path) {
         
         if (data.profileStatus.imap_worker_completed_at) {
           clearInterval(pollingFunction);
+          $('.progress .bar').css('width', '100%');
           console.log('Profile marked as complete. Polling stopped.');
-
         }   
       });
-    }, 2000);
+    }, 4000);
   });
 };
