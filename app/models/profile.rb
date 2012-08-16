@@ -11,12 +11,22 @@ class Profile < ActiveRecord::Base
 
   has_many :emails, :dependent => :destroy
 
+  def self.delete_marked_and_old_unused_profiles
+    Profile.all.each do |profile|
+      profile.destroy if profile.deleted? && profile.imap_worker_completed_at
+    end
+
+    Profile.all.each do |profile|
+      profile.destroy if profile.created_at < 1.day.ago && profile.imap_worker_completed_at.nil?
+    end
+  end
+  
   def to_param
     self.slug
   end
 
   def deleted?
-    marked_as_deleted == 'deleted'
+    marked_as_deleted
   end
 
   def fetch_and_save_emails

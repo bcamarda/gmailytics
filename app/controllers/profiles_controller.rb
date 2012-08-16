@@ -30,7 +30,7 @@ class ProfilesController < ApplicationController
 
   def destroy
     @profile = Profile.find_by_slug(params[:id])
-    @profile.marked_as_deleted = 'deleted'
+    @profile.marked_as_deleted = true
     if @profile.save
       flash[:success] = "Profile deleted"
       redirect_to root_path
