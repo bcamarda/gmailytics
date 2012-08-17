@@ -311,7 +311,7 @@ class Profile < ActiveRecord::Base
     status_hash
   end
 
-  this code does not work with heroku psql servers
+  # this code does not work with heroku psql servers
 
   def get_junkmail
     all_junkmail = Profile.find_by_sql([
