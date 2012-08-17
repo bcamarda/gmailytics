@@ -6,7 +6,7 @@ var drawGraphs = function(path) {
     var graphTwentyFour 	= createTwentyFourGraph(data.twentyFour, ".twentyFourBar");
     var graphSubjectWordCloud    = createWordCloudGraph(data.newEmailSubjectWordFrequency, ".subjectWordCloud");
     var graphReceivedWordCloud   = createWordCloudGraph(data.newEmailReceivedWordFrequency, ".receivedWordCloud");
-    // var graphJunkmail     = createJunkmailGraph(data.junkmail, ".junkmail")
+    var graphJunkmail     = createJunkmailGraph(data.junkmail, ".junkmail")
 
     //var graphTopRecipients = createTopRecipients(data.topRecipients, ".graphs");
 
@@ -20,7 +20,7 @@ var drawGraphs = function(path) {
         graphTwentyFour.update(data.twentyFour);
         graphSubjectWordCloud.update(data.newEmailSubjectWordFrequency);
         graphReceivedWordCloud.update(data.newEmailReceivedWordFrequency);
-        // graphJunkmail.update(data.junkmail)
+        graphJunkmail.update(data.junkmail)
         console.log('Polled for updated data');
         
         if (data.profileStatus.imap_worker_completed_at) {
