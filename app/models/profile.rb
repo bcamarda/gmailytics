@@ -105,7 +105,7 @@ class Profile < ActiveRecord::Base
     jsonable_data_hash[:newEmailSubjectWordFrequency] = get_word_frequency(@new_emails, :subject)
     jsonable_data_hash[:newEmailReceivedWordFrequency] = get_word_frequency(@new_emails, :from_address)
     jsonable_data_hash[:topRecipients] = get_top_recipients   
-    jsonable_data_hash[:junkmail] = get_junkmail   
+    # jsonable_data_hash[:junkmail] = get_junkmail   
 
     return jsonable_data_hash
   end
@@ -311,7 +311,9 @@ class Profile < ActiveRecord::Base
     status_hash
   end
 
-  # this code does not work with heroku psql servers
+  # this code needs to tell a better story
+
+  
 
   # def get_junkmail
   #   all_junkmail = Profile.find_by_sql([
