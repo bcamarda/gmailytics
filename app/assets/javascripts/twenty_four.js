@@ -24,22 +24,24 @@ var createTwentyFourGraph = function (data, html_element) {
       /****** X Axes/Scales *******/
       var xScale = d3.scale.linear()
       .domain([0, data.length - 1])
-      .range([0, width - padding * 2]);
+      .range([padding, width - padding]);
 
       var xScaleOrdinal = d3.scale.ordinal();
 
       xScaleOrdinal
       .domain(xLabels)
-      .rangeRoundBands([0, width]);
+      .rangeBands([27, width - padding]);
 
       var xAxis = d3.svg.axis().scale(xScaleOrdinal).orient("bottom");
 
       svg.append("svg:g")
-      .attr("transform", "translate(0,0)")
+      .attr("transform", "translate(0,363)")
+      .attr("fill", "none")
       .call(xAxis);
 
       svg.selectAll("g text")
-      .attr("transform", "rotate(60)translate(15, 10)")
+      .attr("transform", "rotate(-75)translate(1, -3)")
+      .attr("text-anchor", "end")
       .attr("class", "chartText");
 
       /****** Y Axes/Scales *******/
@@ -51,6 +53,23 @@ var createTwentyFourGraph = function (data, html_element) {
         yScale = d3.scale.linear()
         .domain([0, yScaleMax])
         .range([0, height - padding * 2]);
+
+        var yLabelsScale = d3.scale.linear()
+          .domain([0, yScaleMax])
+          .range([height - padding * 2, 0]);
+
+        var yAxis = d3.svg.axis()
+          .scale(yLabelsScale)
+          .orient("left");
+
+        svg.append("svg:g")
+          .attr("transform", "translate(35,39)")
+          .attr("fill", "none")
+          .attr("class", "ylabels")
+          .call(yAxis);
+
+        svg.selectAll("g text")
+          .attr("class", "chartText");
       }
 
       drawYScale();
@@ -62,22 +81,15 @@ var createTwentyFourGraph = function (data, html_element) {
       .append("svg:rect")
       .attr("x", function(d, i) { return xScale(i); } )
       .attr("width", barWidth - 5)
-      .attr("y", height)
+      .attr("y", height - padding)
       .attr("height", 0)
       .transition()
       .duration(2000)
-      .attr("y", function(d) { return height - yScale(d.sent); } )
+      .attr("y", function(d) { return height - padding - yScale(d.sent); } )
       .attr("height", function(d) { return yScale(d.sent); } )
-      .attr("fill", "goldenrod");
-
-      function redraw() {
-        svg.selectAll("rect")
-        .data(data)
-        .transition()
-        .duration(2000)
-        .attr("y", function(d) { return height - yScale(d.sent); } )
-        .attr("height", function(d) { return yScale(d.sent); } );
-      }
+      .attr("fill", "goldenrod")
+      .attr("class", "sent")
+      .attr("count", function(d) { return Math.floor(d.sent) + " sent"; });
 
       svg.selectAll("something")
       .data(data)
@@ -85,26 +97,26 @@ var createTwentyFourGraph = function (data, html_element) {
       .append("svg:rect")
       .attr("x", function(d, i) { return xScale(i); })
       .attr("width", barWidth - 5)
-      .attr("y", function(d) { return height - yScale(d.sent); } )
+      .attr("y", function(d) { return height - padding - yScale(d.sent); } )
       .attr("height", 0)
       .transition()
       .duration(2000)
-      .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
+      .attr("y", function(d) { return height - padding - (yScale(d.sent) + yScale(d.received)); }) 
       .attr("height", function(d) { return yScale(d.received); } )
       .attr("fill", "teal")
-      .attr("class", function(d, i) { return "received"; });
+      .attr("class", "received")
+      .attr("count", function(d) { return Math.floor(d.received) + " received"; });
 
-      function redraw2() {
-        svg.selectAll("rect.received")
-        .data(data)
-        .transition()
-        .duration(2000)
-        .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
-        .attr("height", function(d) { return yScale(d.received); } );
-      }
+      $('svg rect').tipsy({ 
+        gravity: 'w', 
+        html: true, 
+        title: function() { return $(this).attr("count"); },
+        fade: true,
+        opacity: 0.8
+      });
     }
 
-    var width = 400, height = 400, padding = 20;
+    var width = 400, height = 400, padding = 40;
     /***** SVG setup ******/
     var svg = d3.select(html_element).append("svg:svg")
     .attr("width", width)
@@ -113,6 +125,7 @@ var createTwentyFourGraph = function (data, html_element) {
     runViz(data);
 
     return { "update": function(data) { 
+      var yScaleMax, yScale;
 
       var utcOffset = function() {
         var d = new Date;
@@ -134,6 +147,25 @@ var createTwentyFourGraph = function (data, html_element) {
         yScale = d3.scale.linear()
         .domain([0, yScaleMax])
         .range([0, height - padding * 2]);
+
+        var yLabelsScale = d3.scale.linear()
+          .domain([0, yScaleMax])
+          .range([height - padding * 2, 0]);
+
+        svg.selectAll(".ylabels").remove();
+
+        var yAxis = d3.svg.axis()
+          .scale(yLabelsScale)
+          .orient("left");
+
+        svg.append("svg:g")
+          .attr("transform", "translate(35,39)")
+          .attr("fill", "none")
+          .attr("class", "ylabels")
+          .call(yAxis);
+
+        svg.selectAll("g text")
+          .attr("class", "chartText");
       }
 
       function redraw() {
@@ -141,8 +173,9 @@ var createTwentyFourGraph = function (data, html_element) {
         .data(data)
         .transition()
         .duration(2000)
-        .attr("y", function(d) { return height - yScale(d.sent); } )
-        .attr("height", function(d) { return yScale(d.sent); } );
+        .attr("y", function(d) { return height - padding - yScale(d.sent); } )
+        .attr("height", function(d) { return yScale(d.sent); } )
+        .attr("count", function(d) { return Math.floor(d.sent) + " sent"; });
       }
 
       function redraw2() {
@@ -150,8 +183,9 @@ var createTwentyFourGraph = function (data, html_element) {
         .data(data)
         .transition()
         .duration(2000)
-        .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
-        .attr("height", function(d) { return yScale(d.received); } );
+        .attr("y", function(d) { return height - padding - (yScale(d.sent) + yScale(d.received)); }) 
+        .attr("height", function(d) { return yScale(d.received); } )
+        .attr("count", function(d) { return Math.floor(d.received) + " received"; });
       }
 
       drawYScale();

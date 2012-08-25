@@ -17,9 +17,26 @@ class ProfilesController < ApplicationController
   def show
     @profile = Profile.find_by_slug(params[:id])
 
-    respond_to do |format|
-      format.json { render :json => @profile.get_graph_data }
-      format.html
+    if @profile.nil? || @profile.deleted?
+      flash[:error] = "Profile not found"
+      redirect_to root_path
+    else
+      respond_to do |format|
+        format.json { render :json => @profile.get_graph_data(params[:last_email_id]) }
+        format.html
+      end
+    end
+  end
+
+  def destroy
+    @profile = Profile.find_by_slug(params[:id])
+    @profile.marked_as_deleted = true
+    if @profile.save
+      flash[:success] = "Profile deleted"
+      redirect_to root_path
+    else
+      flash[:error] = "There was an error deleting your profile. Please try again."
+      redirect_to :back
     end
   end
 

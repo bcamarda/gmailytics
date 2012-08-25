@@ -1,8 +1,11 @@
 var createTopRecipients = function (data, html_element) {
   var runViz = function (data) {
 
+
+      var xLabels = ["Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Decgma"];
+
       var width = 400,
-      height = 600,
+      height = 400,
       padding = 20,
       barWidth = width/data.length;
 
@@ -15,7 +18,7 @@ var createTopRecipients = function (data, html_element) {
       .range([0, width - padding * 2]);
 
       var yScale = d3.scale.linear()
-      .domain([0, 400])
+      .domain([0, 100])
       .range([0, height - padding * 2]);
 
 
@@ -122,17 +125,20 @@ var createTopRecipients = function (data, html_element) {
    return { "update": function(data) { 
 
       var width = 400,
-      height = 600,
+      height = 400,
       padding = 20,
       barWidth = width/data.length;
 
+      // svg = d3.select(html_element).append("svg:svg")
+      // .attr("width", width)
+      // .attr("height", height);
   
       var xScale = d3.scale.linear()
       .domain([0, data.length - 1])
       .range([0, width - padding * 2]);
 
       var yScale = d3.scale.linear()
-      .domain([0, 400])
+      .domain([0, 100])
       .range([0, height - padding * 2]);
 
 
@@ -225,7 +231,7 @@ var createTopRecipients = function (data, html_element) {
       .attr("class", function(d, i) { return "sent5"; })
       .attr("email", function(d) { return "You sent " + d.to5 + " " + d.sent5 + " emails."; });;
 
-       $('svg rect').tipsy({ 
+      $('svg rect').tipsy({ 
         gravity: 'w', 
         html: true, 
         title: function() {

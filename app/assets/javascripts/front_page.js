@@ -12,7 +12,7 @@ var frontPage = function() {
 
   var data = [];
   var createData = function() {      // currently simulates random data 
-    for (var i = 0; i < 23; i++) {
+    for (var i = 0; i < 24; i++) {
       if (i < 12) {
         data.push( {
           "sent": randomEmailCount(i*2 + 40, i*2 + 50),
@@ -34,7 +34,7 @@ var frontPage = function() {
   /***** SVG setup ******/
   var width = 400,
       height = 400,
-      padding = 20,
+      padding = 45,
       barWidth = width/data.length;
 
   var svg = d3.select(".graphs").append("svg:svg")
@@ -44,7 +44,7 @@ var frontPage = function() {
   /****** X Axes/Scales *******/
   var xScale = d3.scale.linear()
     .domain([0, data.length - 1])
-    .range([0, width - padding * 2]);
+    .range([padding, width - padding]);
 
   var xRange = ["8 am", "9 am", "10 am", "11 am", "12 pm", "1 pm", "2 pm", "3 pm", "4 pm",
       "5 pm", "6 pm", "7 pm", "8 pm", "9 pm", "10 pm", "11 pm", "12 am", "1 am",
@@ -55,16 +55,18 @@ var frontPage = function() {
 
   xScaleOrdinal
     .domain(xRange)
-    .rangeRoundBands([0, width]);
+    .rangeBands([31, width - padding]);
 
   var xAxis = d3.svg.axis().scale(xScaleOrdinal).orient("bottom");
 
   svg.append("svg:g")
-    .attr("transform", "translate(0,0")
+    .attr("transform", "translate(-2.5,"+ 357 +")")
+    .attr("fill", "none")
     .call(xAxis);
 
   svg.selectAll("g text")
-    .attr("transform", "rotate(60)translate(15, 10)")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-75)translate(0, 0)")
     .attr("class", "chartText");
 
   /****** Y Axes/Scales *******/
@@ -76,7 +78,7 @@ var frontPage = function() {
 
     yScale = d3.scale.linear()
       .domain([0, yScaleMax])
-      .range([0, height - padding * 2]);
+      .range([padding, height - padding * 2.5]);
   };
 
   drawYScale();
@@ -88,20 +90,20 @@ var frontPage = function() {
     .append("svg:rect")
     .attr("x", function(d, i) { return xScale(i); })
     .attr("width", barWidth - 5)
-    .attr("y", height)
+    .attr("y", height - padding)
     .attr("height", 0)
     .transition()
     .duration(2000)
-    .attr("y", function(d) { return height - yScale(d.sent); }) 
+    .attr("y", function(d) { return height - padding- yScale(d.sent); }) 
     .attr("height", function(d) { return yScale(d.sent); } )
-    .attr("fill", "goldenrod");
+    .attr("fill", "#8FF8FF");
 
   function redraw() {
     svg.selectAll("rect")
       .data(data)
       .transition()
       .duration(2000)
-      .attr("y", function(d) { return height - yScale(d.sent); }) 
+      .attr("y", function(d) { return height - padding - yScale(d.sent); }) 
       .attr("height", function(d) { return yScale(d.sent); } );
   }
 
@@ -111,13 +113,13 @@ var frontPage = function() {
     .append("svg:rect")
     .attr("x", function(d, i) { return xScale(i); })
     .attr("width", barWidth - 5)
-    .attr("y", function(d) { return height - yScale(d.sent); })
+    .attr("y", function(d) { return height - padding - yScale(d.sent); })
     .attr("height", 0)
     .transition()
     .duration(2000)
-    .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
+    .attr("y", function(d) { return height - padding - (yScale(d.sent) + yScale(d.received)); }) 
     .attr("height", function(d) { return yScale(d.received); } )
-    .attr("fill", "teal")
+    .attr("fill", "#FFB35C")
     .attr("class", function(d, i) { return "received"; });
 
   function redraw2() {
@@ -125,7 +127,7 @@ var frontPage = function() {
       .data(data)
       .transition()
       .duration(2000)
-      .attr("y", function(d) { return height - (yScale(d.sent) + yScale(d.received)); }) 
+      .attr("y", function(d) { return height - padding - (yScale(d.sent) + yScale(d.received)); }) 
       .attr("height", function(d) { return yScale(d.received); } )
   }
 

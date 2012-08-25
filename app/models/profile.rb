@@ -3,7 +3,8 @@ class Profile < ActiveRecord::Base
   require 'mail'
   require 'gmail_xoauth'
 
-  attr_accessible :email, :slug, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at, :id
+
+  attr_accessible :email, :slug, :oauth_token, :oauth_token_secret, :imap_worker_started_at, :imap_worker_completed_at, :marked_as_deleted
 
   validates_uniqueness_of :slug
 
@@ -11,8 +12,22 @@ class Profile < ActiveRecord::Base
 
   has_many :emails, :dependent => :destroy
 
+  def self.delete_marked_and_old_unused_profiles
+    Profile.all.each do |profile|
+      profile.destroy if profile.deleted? && profile.imap_worker_completed_at
+    end
+
+    Profile.all.each do |profile|
+      profile.destroy if profile.created_at < 1.day.ago && profile.imap_worker_completed_at.nil?
+    end
+  end
+  
   def to_param
     self.slug
+  end
+
+  def deleted?
+    marked_as_deleted
   end
 
   def fetch_and_save_emails
@@ -39,7 +54,7 @@ class Profile < ActiveRecord::Base
               email_params[:sentreceived] = :received
             end
             
-            header['FLAGS'].include?(:Seen) ? email_params[:seenunseen] = :seen  : email_params[:seenunseen] = :unseen
+            header['FLAGS'].include?(:Seen) ? email_params[:seen] = true  : email_params[:seen] = false
             email_params[:uid]      = header['X-GM-MSGID']
 
             envelope = header['ENVELOPE']
@@ -79,12 +94,20 @@ class Profile < ActiveRecord::Base
     self.update_attributes!(:imap_worker_completed_at => Time.now)
   end
 
-  def get_graph_data
+  def get_graph_data(last_email_processed_id)
+    @new_emails = get_new_emails(last_email_processed_id)
+    @new_emails.empty? ? last_email_processed_id = 0 : last_email_processed_id = @new_emails.last.id
+
     jsonable_data_hash = {}
+    jsonable_data_hash[:lastEmailProcessedId] = last_email_processed_id 
+
     jsonable_data_hash[:profileStatus] = get_profile_status
     jsonable_data_hash[:twentyFour] = get_24_hour_graph
-    jsonable_data_hash[:wordCloud] = get_word_cloud
-    jsonable_data_hash[:topRecipients] = get_top_recipients   
+    jsonable_data_hash[:newEmailSubjectWordFrequency] = get_word_frequency(@new_emails, :subject)
+    jsonable_data_hash[:newEmailReceivedWordFrequency] = get_word_frequency(@new_emails, :from_address)
+    #jsonable_data_hash[:topRecipients] = get_top_recipients   
+    jsonable_data_hash[:junkmail] = get_junkmail   
+
     return jsonable_data_hash
   end
 
@@ -127,12 +150,13 @@ class Profile < ActiveRecord::Base
   private
 
   def generate_slug
-    self.slug ||= generate_keystring(16)
+    self.slug ||= generate_keystring
   end
 
-  def generate_keystring(string_length)
-    char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
-    Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+  def generate_keystring
+    # char_bank = ('a'..'z').to_a + (1..9).to_a - %w(0 o l 1 i)
+    # Array.new(string_length,'A').map {char_bank[rand(char_bank.length - 1)]}.join
+    18.times.map{ rand(10).to_s }.join.to_i
   end
 
 
@@ -225,7 +249,11 @@ class Profile < ActiveRecord::Base
     hourly_array
   end
 
-  def get_word_cloud
+  def get_new_emails(last_email_processed_id = 0)
+    self.emails.where("emails.id > ?", last_email_processed_id ).order("created_at DESC").limit(1000)
+  end
+
+  def get_word_frequency(email_set, property_method)
     common_dict = %w(
     a about after again against all an another any and are as at
     be being been before but by
@@ -239,8 +267,9 @@ class Profile < ActiveRecord::Base
     just
     like
     made me more most my
-    no not
+    new no not
     of off on once one only or other our out over own
+    pm
     re
     said she should so some such 
     than that the their them then there these they this those through to too
@@ -250,21 +279,26 @@ class Profile < ActiveRecord::Base
     you your) 
 
     freq_hash = Hash.new(0)
-    self.emails.each do |email|
-      email.subject.split.each do |word|
-        word = word.gsub(/\W/,'')
+    email_set.each do |email|
+
+      case property_method 
+      when :subject
+        email.subject.split.each do |word|
+          word = word.gsub(/\W/,'')
+          freq_hash[word] += 1 unless word.empty? || common_dict.include?(word.downcase)
+        end
+      when :from_address
+        word = email.from_address.split('@').first
         freq_hash[word] += 1 unless word.empty? || common_dict.include?(word.downcase)
       end
+
     end
     
     word_hash = freq_hash.map { |word, count| { :text => word , :size => count } }
     
     unless word_hash.empty?
       word_hash.sort_by! { |hsh| - hsh[:size] }
-      word_hash = word_hash.slice(0, 50)
-
-      highest_frequency = word_hash.first[:size]
-      word_hash.each { |hsh| hsh[:size] = (hsh[:size] * 100) / highest_frequency }
+      word_hash = word_hash.slice(0, 30)
     end
 
     word_hash
@@ -278,11 +312,97 @@ class Profile < ActiveRecord::Base
       if self.emails.count > 0
         status_hash[:first_email_analyzed_date] = self.emails.first.date.strftime("%a %b %d, %Y")
         status_hash[:last_email_analyzed_date] = self.emails.last.date.strftime("%a %b %d, %Y")
-
         status_hash[:imap_worker_completed_at] = imap_worker_completed_at.strftime("%a %b %d, %Y") if imap_worker_completed_at
       end
  
     end
     status_hash
   end
+
+  def get_junkmail
+    all_junkmail = Profile.find_by_sql([
+      "SELECT *
+      FROM 
+      (
+        SELECT emails.from_address, count(*) AS total_count
+        FROM emails
+        WHERE emails.profile_id = '?' AND emails.seen = false
+        GROUP BY emails.from_address
+        ORDER BY total_count DESC
+        LIMIT 5
+      )
+      e1
+      JOIN 
+      (
+        SELECT emails.from_address, date_part('year', date) AS year, 
+        date_part('month', date) as month, 
+        count(*) AS num_count, rank() OVER (PARTITION BY date_part('year', date),
+        date_part('month', date) 
+        ORDER BY count(*) DESC, from_address ASC)
+        FROM emails
+        WHERE emails.profile_id = '?' AND emails.seen = false
+        GROUP BY emails.from_address, year, month
+      ) 
+      e2 
+      ON e1.from_address = e2.from_address
+      ORDER BY e2.year, e2.month, e2.num_count;", self.id, self.id
+      ])
+
+
+    # I am not particularly proud of any of this code, but we need to get it working
+    # I'll refactor this later to make it less hideous.
+
+    object_array = [{ year: 2011, month: 7, email_one: 0, email_two: 0, email_three: 0, email_four: 0, email_five: 0}]
+    rank_array = []
+    unless self.emails.last.nil?
+      newest_email = self.emails.last
+
+      recent_date = Date.new(newest_email.date.year.to_i, newest_email.date.month.to_i)
+
+      all_junkmail.each do |email|
+        rank_array << email.total_count.to_i
+      end
+
+
+
+      rank_array.uniq!
+      rank_array.sort!
+      rank_array.reverse!
+
+
+      iterating_date = Date.new(2011, 8)
+      while iterating_date <= recent_date + 31
+        junk_one_total = 0
+        junk_two_total = 0
+        junk_three_total = 0
+        junk_four_total = 0
+        junk_five_total = 0
+
+        all_junkmail.each do |email|
+          email_date = Date.new(email.year.to_i, email.month.to_i) 
+          if email_date <= iterating_date
+            case rank_array.index(email.total_count.to_i)
+            when 0 then junk_one_total += email.num_count.to_i
+            when 1 then junk_two_total += email.num_count.to_i
+            when 2 then junk_three_total += email.num_count.to_i
+            when 3 then junk_four_total += email.num_count.to_i
+            when 4 then junk_five_total += email.num_count.to_i
+            end
+          end
+        end
+
+        if iterating_date > Date.today
+          insertion_date = Date.today
+        else
+          insertion_date = iterating_date
+        end
+        object_array << { year: insertion_date.year, month: (insertion_date.month - 1), email_one: junk_one_total, email_two: junk_two_total, email_three: junk_three_total, 
+          email_four: junk_four_total, email_five: junk_five_total }
+        iterating_date = Date.new((iterating_date + 31).year, (iterating_date + 31).month)
+      end  
+    end
+    object_array
+  end
+  
+
 end
