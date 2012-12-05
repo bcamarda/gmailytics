@@ -41,7 +41,6 @@ class Recipient
 		new_ar
 	end
 
-
 	def self.create_empty_array
 		recipients_empty = []
 		for i in 1..12 do
